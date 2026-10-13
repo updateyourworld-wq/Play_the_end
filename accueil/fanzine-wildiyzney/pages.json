@@ -1,0 +1,122 @@
+{
+  "title": "WILDIYZNEY WORLD",
+  "author": "Irvin Flesh",
+  "sourceSha256": "c42536242a278ec960b410a50d37048299d5fa8e6d4ed5f867d52743b2b92765",
+  "renderDpi": 180,
+  "contentRetouched": false,
+  "edgeTreatment": "CSS outside page images only",
+  "pages": [
+    {
+      "number": 1,
+      "file": "page-01.png",
+      "width": 1049,
+      "height": 1489,
+      "sha256": "9cad7dd1a4881bbadb05e260e1e824520cb4e85593b508ef3116f6f3e3499f61"
+    },
+    {
+      "number": 2,
+      "file": "page-02.png",
+      "width": 1049,
+      "height": 1489,
+      "sha256": "0bde65a8697f116317a20cf32c2f5476bb9b2cc8c7bd079c693f9de4982fa843"
+    },
+    {
+      "number": 3,
+      "file": "page-03.png",
+      "width": 1049,
+      "height": 1489,
+      "sha256": "70aeb6a94ae8b8fa318c187bbbd36f03a9686bf17a98d681d633f29e5c901461"
+    },
+    {
+      "number": 4,
+      "file": "page-04.png",
+      "width": 1049,
+      "height": 1489,
+      "sha256": "678659b4c3709e90a545cc5a95a81a3077745c6c58aa9fadf8cfe9892197021a"
+    },
+    {
+      "number": 5,
+      "file": "page-05.png",
+      "width": 1049,
+      "height": 1489,
+      "sha256": "e8fb79a395cb3e3e3450a3b657b2531a2cbf38ae0f0b9dd06f6cdf980fc1cc6e"
+    },
+    {
+      "number": 6,
+      "file": "page-06.png",
+      "width": 1049,
+      "height": 1489,
+      "sha256": "72321c69ed3689277b40564da989b4e4ca43b6fd4a660d838d130eb8f654b859"
+    },
+    {
+      "number": 7,
+      "file": "page-07.png",
+      "width": 1049,
+      "height": 1489,
+      "sha256": "2ecb833fe357ea0cf1ddd5cd8a7f8bb8e49609a2a526a904a5d38d8c3d623dc0"
+    },
+    {
+      "number": 8,
+      "file": "page-08.png",
+      "width": 1049,
+      "height": 1489,
+      "sha256": "5228078783c415db5c40923f777b373e863233a43762eaf8d41a6f118bf3cd79"
+    },
+    {
+      "number": 9,
+      "file": "page-09.png",
+      "width": 1049,
+      "height": 1489,
+      "sha256": "44d2482becf8d9d7b64fa687f6b9f6f442a414fdde3c5deeb53e759bc4e882e4"
+    },
+    {
+      "number": 10,
+      "file": "page-10.png",
+      "width": 1049,
+      "height": 1489,
+      "sha256": "7c62f6cc1d49d10159a79162b14f45a887edc7e5642e6ba6d5308c26a831b5b6"
+    },
+    {
+      "number": 11,
+      "file": "page-11.png",
+      "width": 1049,
+      "height": 1489,
+      "sha256": "bf4144a45ac6f564dc3d3a8d2ebb05204a2c801eea1391e21b9dfd54998180e1"
+    },
+    {
+      "number": 12,
+      "file": "page-12.png",
+      "width": 1049,
+      "height": 1489,
+      "sha256": "f21c099f5df73bbe2a68811a68fb12eac938e745b955b931cbfabadb50336427"
+    }
+  ],
+  "spreads": [
+    [
+      1
+    ],
+    [
+      2,
+      3
+    ],
+    [
+      4,
+      5
+    ],
+    [
+      6,
+      7
+    ],
+    [
+      8,
+      9
+    ],
+    [
+      10,
+      11
+    ],
+    [
+      12
+    ]
+  ]
+}
