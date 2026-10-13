@@ -1,0 +1,1091 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#242822">
+  <title>Play The End | Combat naval</title>
+  <script src="accueil/entry.js"></script>
+  <script src="accueil/game-host.js"></script>
+  <script src="data/portwatch-suez-snapshot.js"></script>
+  <script src="portwatch.js"></script>
+  <script src="world-data.js"></script>
+  <script src="sprites-navals/versions/frames.js"></script>
+  <script src="sprites-mer/frames.js"></script>
+  <script src="sprites-map/lot-1/frames.js"></script>
+  <style>
+    :root { color-scheme: light; --paper:#e3e8de; --panel:#f1f4ea; --ink:#242c26; --muted:#67766a; --line:#b0bcab; --gold:#e1ad43; --red:#c44e3d; --green:#557b48; --cyan:#39a8b6; --font:ui-monospace,Menlo,Consolas,monospace; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-width:320px; background:var(--paper); color:var(--ink); font:13px/1.45 var(--font); }
+    button { font:inherit; color:inherit; }
+    button:disabled { cursor:default; }
+    :focus-visible { outline:3px solid var(--gold); outline-offset:3px; }
+    .shell { width:min(1160px,calc(100% - 32px)); margin:0 auto; padding:18px 0 30px; }
+    header { display:flex; justify-content:space-between; align-items:center; gap:18px; padding:13px 16px; background:var(--ink); color:#f3f1dc; border-bottom:4px solid var(--gold); }
+    h1 { font-size:19px; margin:0; line-height:1.35; letter-spacing:0; }
+    .subtitle { color:#bccbb9; font-size:10px; margin-top:3px; }
+    .header-controls { display:flex; gap:7px; align-items:center; }
+    .command { display:inline-flex; align-items:center; justify-content:center; gap:7px; min-height:36px; border:1px solid #8c9a88; background:transparent; color:inherit; padding:7px 10px; cursor:pointer; font-size:11px; }
+    .command:hover:not(:disabled) { background:#ffffff15; border-color:var(--gold); }
+    .command:disabled { opacity:.45; }
+    .command svg { width:15px; height:15px; flex-shrink:0; }
+    .status { display:flex; align-items:center; gap:12px; min-height:42px; padding:9px 0; border-bottom:1px solid var(--line); }
+    .status-led { width:8px; height:8px; flex-shrink:0; background:var(--green); }
+    .status[data-turn="world"] .status-led { background:var(--gold); }
+    .status[data-turn="over"] .status-led { background:var(--red); }
+    #status-text { flex:1; font-size:12px; }
+    .turn-number { color:var(--muted); font-size:10px; white-space:nowrap; }
+    .layout { display:grid; grid-template-columns:minmax(0,760px) minmax(255px,1fr); gap:22px; margin-top:16px; align-items:start; }
+    .boards { display:grid; gap:16px; min-width:0; }
+    .board { border:2px solid var(--ink); background:var(--panel); min-width:0; }
+    .board-heading { display:flex; justify-content:space-between; gap:12px; align-items:center; padding:9px 12px; border-bottom:2px solid var(--ink); }
+    h2 { font-size:12px; margin:0; }
+    .board-heading small { font-size:9px; color:var(--muted); white-space:nowrap; }
+    .fleet-view { display:grid; grid-template-columns:minmax(0,1fr) 166px; min-height:218px; background:#132b2b; }
+    .fleet-art { display:grid; place-items:center; padding:5px 9px; min-width:0; }
+    canvas { display:block; image-rendering:pixelated; }
+    #fleet-canvas { width:min(100%,400px); height:auto; aspect-ratio:320/176; }
+    .fleet-list { padding:8px 10px; border-left:1px solid #496259; color:#eff0da; display:grid; gap:5px; align-content:center; }
+    .fleet-row { padding:5px 0; border-bottom:1px solid #476052; }
+    .fleet-row:last-child { border-bottom:0; }
+    .fleet-name { font-size:9px; display:block; }
+    .health { display:flex; gap:3px; margin-top:4px; }
+    .health i { display:block; height:5px; width:13px; background:#aaca69; }
+    .health i.used { background:#db6845; }
+    .fleet-row.sunk { color:#e78b72; }
+    .fleet-row.sunk .health i { background:#9b5140; }
+    .board-caption { display:flex; justify-content:space-between; gap:12px; padding:7px 12px; font-size:10px; color:var(--muted); border-top:1px solid var(--line); }
+    .region-content { display:grid; grid-template-columns:minmax(0,1fr) 166px; align-items:center; }
+    .region-art { padding:10px 13px 9px; display:grid; place-items:center; background:#192e2b; }
+    .region-map { position:relative; width:min(100%,344px); aspect-ratio:1; }
+    #region-canvas { position:absolute; inset:0; width:100%; height:100%; }
+    .target-grid { position:absolute; left:7.142857%; top:7.142857%; width:85.714286%; height:85.714286%; display:grid; grid-template-columns:repeat(10,minmax(0,1fr)); grid-template-rows:repeat(10,minmax(0,1fr)); }
+    .target { min-width:0; padding:0; border:1px solid #dcf1d638; background:transparent; cursor:crosshair; }
+    .target:hover:not(:disabled), .target:focus-visible:not(:disabled) { background:#f4cc5366; box-shadow:inset 0 0 0 2px #ffd66e; outline:none; }
+    .target:disabled { cursor:default; }
+    .target[data-result="hit"] { box-shadow:inset 0 0 0 2px #e9ba62; }
+    .target[data-result="sunk"] { box-shadow:inset 0 0 0 2px #df7960; }
+    .target[data-result="miss"] { box-shadow:inset 0 0 0 1px #aeb4a780; }
+    .resources { padding:12px 10px; align-self:stretch; display:grid; align-content:center; gap:15px; border-left:1px solid var(--line); }
+    .resource-name { display:flex; justify-content:space-between; align-items:baseline; gap:4px; font-size:10px; }
+    .resource-name span { font-size:9px; color:var(--muted); }
+    .resource-health { display:flex; gap:3px; margin-top:5px; }
+    .resource-health i { height:7px; width:16px; background:#c8d3bf; border:1px solid #a4b398; }
+    .resource-health i.found { background:var(--gold); border-color:#a27b2f; }
+    .resource.depleted .resource-name strong { color:var(--red); }
+    .resource.depleted .resource-health i { background:#cc6b4e; border-color:#944f3c; }
+    aside { min-width:0; }
+    .telemetry { padding:0 0 17px; border-bottom:2px solid var(--ink); }
+    .side-heading { font-size:11px; margin:0 0 14px; display:flex; justify-content:space-between; gap:8px; }
+    .side-heading small { font-size:9px; color:var(--muted); font-weight:400; }
+    .metric { margin:13px 0 0; }
+    .metric-label { display:flex; justify-content:space-between; gap:8px; font-size:10px; }
+    .metric-label b { font-size:14px; }
+    .meter { height:9px; border:1px solid #95a589; background:#cbd6c0; margin-top:5px; }
+    .meter span { display:block; height:100%; background:var(--green); width:0; transition:width .25s steps(8); }
+    #reply-bar { background:var(--red); }
+    #stress-bar { background:#c7983f; }
+    .salvo { display:flex; justify-content:space-between; align-items:center; gap:8px; margin-top:13px; padding:8px 0; font-size:10px; border-top:1px solid var(--line); }
+    .signal-section { padding:16px 0; border-bottom:2px solid var(--ink); }
+    .signal-line { display:flex; justify-content:space-between; gap:12px; padding:5px 0; font-size:10px; border-bottom:1px solid var(--line); }
+    .signal-line:last-child { border-bottom:0; }
+    .signal-line span { color:var(--muted); }
+    .source { color:var(--muted); font:10px/1.5 system-ui,sans-serif; margin-top:10px; }
+    .source a { color:inherit; text-decoration:underline; text-underline-offset:2px; }
+    .mode { display:inline-block; margin:0 0 6px; font-size:9px; padding:3px 6px; background:#d4ddc8; color:#486039; }
+    .mode.demo { background:#e9daba; color:#7d602b; }
+    .journal { padding:16px 0 0; }
+    #log { list-style:none; margin:0; padding:0; max-height:290px; overflow:auto; }
+    #log li { border-top:1px solid var(--line); padding:8px 0; font:11px/1.45 system-ui,sans-serif; color:#4e5c50; }
+    #log time { display:block; margin-bottom:3px; font:9px var(--font); color:var(--muted); }
+    .result-banner { padding:10px 12px; font-size:11px; margin-top:12px; background:#cfdbbe; border-left:4px solid var(--green); }
+    .result-banner.loss { background:#edcec2; border-color:var(--red); }
+    .source-note { margin:10px 0 0; font:10px/1.5 system-ui,sans-serif; color:var(--muted); }
+    [hidden] { display:none !important; }
+    @media (prefers-reduced-motion:reduce) { * { transition:none !important; } }
+  </style>
+  <link rel="stylesheet" href="layout-publicite/habillage.css?v=popups-lisibles-v8">
+</head>
+<body>
+  <div class="game-viewport">
+  <div class="game-stage" id="game-stage">
+  <div class="room" id="room">
+  <img class="wall-poster" src="accueil/poster-join-the-tribe-original.jpg" alt="Affiche Join the Tribe, dessin de l'artiste, sur le mur de la chambre." width="2480" height="3508">
+  <main class="shell" id="game-screen" tabindex="-1">
+    <header>
+      <div><h1>Play The End</h1><div class="subtitle">COMBAT NAVAL / HUMANIT&Eacute; CONTRE TERRE</div></div>
+      <div class="header-controls" id="header-controls">
+        <button class="command" id="home" type="button" title="Retour à l'accueil" aria-label="Retour à l'accueil"><svg class="lucide lucide-house" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1Z"/><path d="M9 21v-8h6v8"/></svg></button>
+        <button class="command" id="sound-toggle" type="button" title="Couper les effets sonores" aria-label="Couper les effets sonores" aria-pressed="true"><svg class="lucide lucide-volume-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m11 5-6 4H2v6h3l6 4V5Z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07M19.07 4.93a10 10 0 0 1 0 14.14"/></svg></button>
+        <button class="command" id="data-toggle" type="button" title="Signaux de la session" aria-label="Signaux de la session" aria-expanded="false"><svg class="lucide lucide-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg></button>
+        <button class="command" id="shuffle" type="button" title="M&eacute;langer la flotte avant le premier tir" aria-label="M&eacute;langer la flotte"><svg class="lucide lucide-shuffle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 14 4 4-4 4"/><path d="m18 2 4 4-4 4"/><path d="M2 18h2.5a6 6 0 0 0 5-2.7l5-6.6a6 6 0 0 1 5-2.7H22"/><path d="M2 6h2.5a6 6 0 0 1 5 2.7l5 6.6a6 6 0 0 0 5 2.7H22"/></svg><span>Flotte</span></button>
+        <button class="command" id="new-game" type="button" title="Nouvelle partie" aria-label="Nouvelle partie"><svg class="lucide lucide-rotate-ccw" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 2.6-6.4L3 8"/><path d="M3 3v5h5"/></svg><span>Nouvelle partie</span></button>
+      </div>
+    </header>
+    <div class="status" id="status" data-turn="loading" aria-live="polite"><i class="status-led"></i><span id="status-text">Lecture des signaux du monde...</span><span class="session-mode" id="session-mode">DATA</span><span class="turn-number">TOUR <b id="turn-number">01</b></span></div>
+    <div class="layout">
+      <div class="boards">
+        <section class="board" aria-labelledby="fleet-title">
+          <div class="board-heading"><h2 id="fleet-title">VOTRE FLOTTE / VUE DE R&Eacute;F&Eacute;RENCE</h2><small id="fleet-count">5 CARGOS EN MER</small></div>
+          <div class="fleet-view">
+            <div class="fleet-art"><img class="fleet-weather" id="fleet-weather" src="sprites-cataclysme/tempete-static.png" alt="" width="720" height="480" aria-hidden="true"><img class="fleet-brand" id="fleet-brand" src="logo-play-the-end/logo-play-the-end-v1.png" alt="" width="1254" height="1254" aria-hidden="true"><canvas id="fleet-canvas" width="320" height="176" role="img" aria-label="Flotte de cinq cargos sur une grille oc&eacute;anique isom&eacute;trique de dix par dix cases."></canvas></div>
+            <div class="fleet-list" id="fleet-list"></div>
+          </div>
+          <div class="board-caption"><span id="last-reply">AUCUN TIR ADVERSE</span><span id="fleet-hits">INT&Eacute;GRIT&Eacute; 17 / 17</span></div>
+        </section>
+        <section class="board" aria-labelledby="earth-title">
+          <div class="board-heading board-heading--earth">
+            <div class="earth-heading"><h2 id="earth-title">LA TERRE / VUE DE JEU</h2><small id="region-label">BORN&Eacute;O &middot; 01 / 10</small></div>
+            <div class="music-controls" id="music-controls" data-state="idle" role="group" aria-label="Musique du jeu">
+              <button class="music-toggle" id="music-toggle" type="button" title="Lancer la musique" aria-label="Lancer la musique" aria-pressed="false"><svg class="lucide lucide-music" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></button>
+              <input id="music-volume" type="range" min="0" max="100" step="1" value="25" aria-label="Volume de la musique" aria-valuetext="25 %" title="Volume de la musique">
+              <output id="music-level" for="music-volume">25%</output>
+            </div>
+          </div>
+          <div class="region-content">
+            <div class="region-art">
+              <div class="region-map">
+                <canvas id="region-canvas" width="280" height="280" role="img" aria-label="Carte r&eacute;gionale vue du dessus. Les zones de ressources sont cach&eacute;es."></canvas>
+                <div class="target-grid" id="targets" role="group" aria-label="Choisir une case de la Terre, de A1 &agrave; J10"></div>
+              </div>
+            </div>
+            <div class="resources" id="resources" aria-label="Etat des zones terrestres et marines secr&egrave;tes"></div>
+          </div>
+          <div class="board-caption"><span id="last-shot">AUCUNE CASE SOND&Eacute;E</span><span id="earth-hits">ZONES &Eacute;PUIS&Eacute;ES 0 / 7</span></div>
+        </section>
+      </div>
+      <aside aria-label="Signaux et journal de la Terre">
+        <section class="telemetry">
+          <h2 class="side-heading">RETOUR DU MONDE <small>INDICES DE JEU</small></h2>
+          <div class="metric"><div class="metric-label"><span>Pression &eacute;cologique</span><b id="stress-value">0</b></div><div class="meter"><span id="stress-bar"></span></div></div>
+          <div class="metric"><div class="metric-label"><span>Intensit&eacute; des ripostes</span><b id="reply-value">0</b></div><div class="meter"><span id="reply-bar"></span></div></div>
+          <div class="salvo"><span>PROCHAINE SALVE</span><strong id="salvo-value">1 OU 2 CASES</strong></div>
+        </section>
+        <section class="signal-section">
+          <h2 class="side-heading">SIGNAUX DE LA SESSION <small id="source-time">UTC</small></h2>
+          <div class="signal-line"><span>Vent</span><strong id="wind-value">--</strong></div>
+          <div class="signal-line"><span>Temp&eacute;rature / humidit&eacute;</span><strong id="heat-value">--</strong></div>
+          <div class="signal-line"><span>Particules PM2.5</span><strong id="air-value">--</strong></div>
+          <div class="signal-line"><span>S&eacute;ismes / 24 h</span><strong id="quake-value">--</strong></div>
+          <div class="signal-line"><span>PortWatch / Suez</span><strong id="naval-value">--</strong></div>
+          <div class="signal-line"><span>Observation navale</span><strong id="naval-date">--</strong></div>
+          <div class="source"><a href="https://portwatch.imf.org/" target="_blank" rel="noopener">IMF PortWatch</a></div>
+          <div class="source"><span class="mode demo" id="weather-source">CHARGEMENT</span><br><a href="https://open-meteo.com/en/docs" target="_blank" rel="noopener">Open-Meteo / CAMS</a> / <a href="https://earthquake.usgs.gov/earthquakes/feed/v1.0/geojson.php" target="_blank" rel="noopener">USGS</a></div>
+          <p class="source-note" id="source-note"></p>
+        </section>
+        <section class="journal">
+          <h2 class="side-heading">JOURNAL DE COMBAT <small id="shot-count">0 CASES SOND&Eacute;ES</small></h2>
+          <ol id="log" aria-live="polite"></ol>
+        </section>
+      </aside>
+    </div>
+    <div class="result-banner" id="outcome" role="dialog" aria-modal="true" aria-labelledby="outcome-title" aria-describedby="outcome-message outcome-score" hidden>
+      <div class="ending-window"><div class="ending-art"><img id="outcome-art" src="sprites-fin/v2/silver-static.png" alt="" width="720" height="360" aria-hidden="true"><p class="ending-score" id="outcome-score"></p></div><h2 class="sr-only" id="outcome-title"></h2><p class="sr-only" id="outcome-message"></p>
+        <div class="ending-actions"><button class="command" id="ending-replay" type="button" title="Rejouer" aria-label="Rejouer"><svg class="lucide lucide-rotate-ccw" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 2.6-6.4L3 8"/><path d="M3 3v5h5"/></svg></button><button class="command" id="ending-home" type="button" title="Retour au menu" aria-label="Retour au menu"><svg class="lucide lucide-house" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1Z"/><path d="M9 21v-8h6v8"/></svg></button></div>
+      </div>
+    </div>
+    <div class="promo-strip" id="promo-strip"><img id="promo-art" src="sprites-interface/banner-static.png" alt="" width="800" height="34" aria-hidden="true"><span>A NEW DAY. A TOUGHER GAME.</span></div>
+  </main>
+  <div class="instrument" aria-label="Jauge cataclysme"><span class="instrument-label">CATACLYSME</span><div class="instrument-track"><i class="instrument-fill" id="cat-bar"></i></div><strong id="cat-value">0%</strong></div>
+  <div class="lamp-row" id="lamps" data-level="low" aria-label="Niveau de tension"><i></i><i></i><i></i></div>
+  </div>
+  </div>
+  </div>
+  <audio id="game-music" src="audio/break-beat-90s.mp3" loop preload="none"></audio>
+  <script>
+  (() => {
+    "use strict";
+    const N = 10;
+    const SHIPS = [
+      { name:"Porte-conteneurs", short:"CONTENEURS", len:5, kind:"container" },
+      { name:"Pétrolier", short:"PÉTROLIER", len:4, kind:"tanker" },
+      { name:"Vraquier", short:"VRAQUIER", len:3, kind:"bulk" },
+      { name:"Roulier", short:"ROULIER", len:3, kind:"ro" },
+      { name:"Cargo côtier", short:"CÔTIER", len:2, kind:"coast" }
+    ];
+    // Demo anchors are game data, not surveyed deposits or potable-water measurements.
+    const RESOURCE_DATA = [
+      { name:"Forêt", short:"FORÊT", len:5, habitat:"land", kind:"forest", color:"#f1c666", anchor:{x:6,y:2} },
+      { name:"Eau potable", short:"EAU POTABLE", len:4, habitat:"land", kind:"water", color:"#70c9db", anchor:{x:3,y:5} },
+      { name:"Minerai", short:"MINERAI", len:3, habitat:"land", kind:"mineral", color:"#e6a978", anchor:{x:6,y:6} },
+      { name:"Terrain", short:"TERRAIN", len:2, habitat:"land", kind:"land", color:"#dce29c", anchor:{x:3,y:2} },
+      { name:"Minerai offshore", short:"MINERAI / MER", len:3, habitat:"sea", kind:"mineral", color:"#e6a978", anchor:{x:1,y:1} },
+      { name:"Fonds marins", short:"TERRAIN / MER", len:2, habitat:"sea", kind:"land", color:"#dce29c", anchor:{x:8,y:0} },
+      { name:"Milieu marin", short:"EAUX MARINES", len:1, habitat:"sea", kind:"water", color:"#70c9db", anchor:{x:0,y:7} }
+    ];
+    const MISS_MARKS = {
+      land:[{kind:"dry",label:"sol desséché"},{kind:"fire",label:"sol en feu"},{kind:"skull",label:"crâne animal"},{kind:"cactus",label:"cactus, sol désertifié"}],
+      sea:[{kind:"dry",label:"eau polluée"},{kind:"fire",label:"nappe en feu"},{kind:"skull",label:"crâne animal flottant"}]
+    };
+    const LAND = [
+      "0000100000","0001111000","0011111100","0111111110","0111111111",
+      "0011111110","0011111110","0001111100","0001111000","0000110000"
+    ];
+    const worldData=window.PLAY_THE_END_DATA;
+    const REGION=worldData.regionFor(typeof URLSearchParams==='undefined'?null:new URLSearchParams(window.location?.search || '').get('region'));
+    const DEMO=worldData.createDemo(REGION);
+    const app = { game:null, sequence:0, animation:0, phase:0, waterFrame:0, waterSprite:null, mapSprite:null, resourceSprites:null, sound:true, audio:null, musicEnabled:true, musicVolume:.25, musicStarted:false, musicPending:null, musicError:false, navalSprites:new Map(), dollarSequence:0 };
+    const $ = id => document.getElementById(id);
+    const key = (x,y) => x + "," + y;
+    const inside = (x,y) => x>=0 && x<N && y>=0 && y<N;
+    const cellName = (x,y) => "ABCDEFGHIJ"[x] + (y+1);
+    const clamp = (n,min=0,max=1) => Math.max(min,Math.min(max,n));
+    const onLand = (x,y,land=LAND) => inside(x,y) && land[y][x] === "1";
+    const fleetCtx = $("fleet-canvas").getContext("2d");
+    const regionCtx = $("region-canvas").getContext("2d");
+    fleetCtx.imageSmoothingEnabled=false;
+    regionCtx.imageSmoothingEnabled=false;
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+    function hash(text) {
+      let h=2166136261;
+      for (let i=0;i<text.length;i++) { h^=text.charCodeAt(i); h=Math.imul(h,16777619); }
+      return h>>>0;
+    }
+    function rng(seed) {
+      let a=seed>>>0;
+      return () => { a+=0x6D2B79F5; let t=a; t=Math.imul(t^(t>>>15),t|1); t^=t+Math.imul(t^(t>>>7),t|61); return ((t^(t>>>14))>>>0)/4294967296; };
+    }
+    function cellsFor(x,y,len,vertical) {
+      return Array.from({length:len},(_,i)=>({x:x+(vertical?0:i),y:y+(vertical?i:0)}));
+    }
+    function canPlace(cells,map,habitat,land) {
+      return cells.every(c=>{
+        if(!inside(c.x,c.y) || (habitat==="land" && !onLand(c.x,c.y,land)) || (habitat==="sea" && onLand(c.x,c.y,land)))return false;
+        for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)if(map.has(key(c.x+dx,c.y+dy)))return false;
+        return true;
+      });
+    }
+    function makeFleet(specs,seed,landOnly=false,land=LAND) {
+      const random=rng(seed), map=new Map(), pieces=[];
+      const orientations=[];
+      // Single cells have no orientation; balance only the longer zones.
+      if(landOnly) for(const habitat of new Set(specs.map(spec=>spec.habitat || "land"))) {
+        const indices=specs.map((spec,i)=>({spec,i})).filter(({spec})=>spec.len>1 && (spec.habitat || "land")===habitat).map(({i})=>i);
+        const verticals=Math.floor(indices.length/2)+(indices.length%2 && random()<.5?1:0);
+        const plan=indices.map((_,i)=>i<verticals);
+        for(let i=plan.length-1;i>0;i--) {
+          const j=Math.floor(random()*(i+1));
+          [plan[i],plan[j]]=[plan[j],plan[i]];
+        }
+        indices.forEach((index,i)=>{orientations[index]=plan[i];});
+      }
+      const candidates=specs.map(spec=>{
+        const index=specs.indexOf(spec);
+        const vertical=spec.len===1?false:landOnly?orientations[index]:random()<.5;
+        const anchor=spec.anchor || {x:Math.floor(random()*N),y:Math.floor(random()*N)};
+        const options=[];
+        for (let y=0;y<N;y++) for(let x=0;x<N;x++) for(const v of spec.len===1?[false]:[vertical,!vertical]) {
+          const cells=cellsFor(x,y,spec.len,v);
+          if((!landOnly || v===vertical) && canPlace(cells,map,spec.habitat || (landOnly?"land":"any"),land)) options.push({cells,v,x,y,d:Math.abs(x-anchor.x)+Math.abs(y-anchor.y)+random()*.25});
+        }
+        options.sort((a,b)=>(landOnly?Number(a.v!==vertical)-Number(b.v!==vertical):0) || a.d-b.d);
+        return options;
+      });
+      let visited=0;
+      // Backtrack instead of weakening the mandatory gap when an anchor is crowded.
+      function place(index) {
+        if(index===specs.length)return true;
+        if(++visited>20000)return false;
+        const spec=specs[index],habitat=spec.habitat || (landOnly?"land":"any");
+        for(const option of candidates[index]) {
+          if(!canPlace(option.cells,map,habitat,land))continue;
+          const piece={...spec,cells:option.cells,vertical:option.v,hits:new Set()};
+          pieces[index]=piece;
+          for(const cell of piece.cells)map.set(key(cell.x,cell.y),index);
+          if(place(index+1))return true;
+          for(const cell of piece.cells)map.delete(key(cell.x,cell.y));
+          if(visited>20000)break;
+        }
+        pieces.length=index;
+        return false;
+      }
+      if(!place(0))throw new Error("Placement impossible : espacement des zones");
+      return {pieces,map};
+    }
+    function makeTerrain(seed) {
+      const random=rng(seed), cells=[];
+      const cx=4.5+(random()-.5)*.8,cy=4.5+(random()-.5)*.8;
+      const rx=3.5+random()*.8,ry=3.5+random()*.8,angle=random()*Math.PI;
+      const a=random()*Math.PI*2,b=random()*Math.PI*2, count=50+Math.floor(random()*7);
+      for(let y=0;y<N;y++)for(let x=0;x<N;x++) {
+        const dx=x-cx,dy=y-cy;
+        const u=(dx*Math.cos(angle)+dy*Math.sin(angle))/rx;
+        const v=(-dx*Math.sin(angle)+dy*Math.cos(angle))/ry;
+        const theta=Math.atan2(v,u);
+        cells.push({x,y,score:1-Math.hypot(u,v)+.15*Math.sin(theta*3+a)+.08*Math.cos(theta*5+b)+random()*.06});
+      }
+      cells.sort((a,b)=>b.score-a.score);
+      const selected=new Set(cells.slice(0,count).map(cell=>key(cell.x,cell.y)));
+      return Array.from({length:N},(_,y)=>Array.from({length:N},(_,x)=>selected.has(key(x,y))?"1":"0").join(""));
+    }
+    function makeRegion(seed) {
+      const placementSeed=hash(seed+"|resources");
+      // Only accept coastlines that can host all zones with balanced orientations.
+      for(let attempt=0;attempt<32;attempt++) {
+        const land=makeTerrain(hash(seed+"|coast|"+attempt));
+        try {
+          const earth=makeFleet(RESOURCE_DATA,placementSeed,true,land);
+          const horizontalLand=earth.pieces.filter(piece=>piece.habitat==="land" && !piece.vertical).length;
+          const horizontalSea=earth.pieces.filter(piece=>piece.habitat==="sea" && piece.len>1 && !piece.vertical).length;
+          if(horizontalLand===2 && horizontalSea===1)return {land,earth};
+        }catch(error){if(!error.message.startsWith("Placement impossible"))throw error;}
+      }
+      for(let retry=0;retry<64;retry++) {
+        try {return {land:LAND,earth:makeFleet(RESOURCE_DATA,hash(placementSeed+"|fallback|"+retry),true,LAND)};}
+        catch(error){if(!error.message.startsWith("Placement impossible"))throw error;}
+      }
+      throw new Error("Placement impossible : aucune carte valide");
+    }
+    function makeGame(world,playerSeed,boardSeed=playerSeed) {
+      const mapSeed=hash(world.seed+"|map|"+boardSeed),{land,earth}=makeRegion(mapSeed);
+      return {
+        world, mapSeed, land, player:makeFleet(SHIPS,playerSeed), earth,
+        onEarth:new Map(), onPlayer:new Map(), turn:"you", round:1, started:false,
+        strain:0, earthShots:0, lastReply:null, log:[], winner:null
+      };
+    }
+    function sunk(piece) { return piece.hits.size===piece.len; }
+    function allSunk(fleet) { return fleet.pieces.every(sunk); }
+    function resolve(fleet,shots,x,y) {
+      const k=key(x,y);
+      if(!inside(x,y) || shots.has(k)) return null;
+      const index=fleet.map.get(k);
+      if(index===undefined) { shots.set(k,{kind:"miss"}); return {kind:"miss",cell:k}; }
+      const piece=fleet.pieces[index];
+      piece.hits.add(k);
+      const result={kind:"hit",index,cell:k};
+      shots.set(k,result);
+      return {...result,piece,sunk:sunk(piece)};
+    }
+    function pressure(game) {
+      return worldData.pressure(game.world,game.strain);
+    }
+    function retaliation(game) {
+      const weather=clamp(game.world.weather.speed/55);
+      const mags=game.world.quakes.map(q=>q.mag);
+      const seismic=mags.length?clamp((Math.max(...mags)-2.5)/5):0;
+      return clamp(.46*pressure(game)+.31*weather+.23*seismic);
+    }
+    function chooseEarthShot(game) {
+      const signalCount=Math.max(1,game.world.quakes.length);
+      const signal=game.world.quakes[game.earthShots%signalCount] || {id:"weather",lon:0,lat:0,depth:0,mag:0};
+      const random=rng(hash(game.world.seed+"|shot|"+game.earthShots));
+      const choices=[];
+      const followProbability=.2+.55*retaliation(game);
+      if(random()<followProbability) {
+        for(const piece of game.player.pieces) {
+          if(sunk(piece)) continue;
+          for(const hit of piece.hits) {
+            const [x,y]=hit.split(",").map(Number);
+            for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]) {
+              if(inside(x+dx,y+dy) && !game.onPlayer.has(key(x+dx,y+dy))) choices.push({x:x+dx,y:y+dy});
+            }
+          }
+        }
+      }
+      if(choices.length) return {...choices[Math.floor(random()*choices.length)],signal,follow:true};
+      const angle=(game.world.weather.direction+180)*Math.PI/180;
+      const dx=Math.round(Math.sin(angle)), dy=Math.round(-Math.cos(angle));
+      const drift=Math.floor(game.earthShots/signalCount);
+      const x0=((Math.floor((signal.lon+180)/360*N)+dx*drift)%N+N)%N;
+      const y0=((Math.floor((90-signal.lat)/180*N)+dy*drift)%N+N)%N;
+      // Shuffling the remaining coordinates prevents repeated signals from collapsing into one row.
+      const free=[];
+      for(let y=0;y<N;y++) for(let x=0;x<N;x++) if(!game.onPlayer.has(key(x,y))) {
+        free.push({x,y,score:Math.abs(x-x0)+Math.abs(y-y0)+random()*.6});
+      }
+      free.sort((a,b)=>a.score-b.score);
+      return free.length?{...free[0],signal,follow:false}:null;
+    }
+    function hazard(game,signal) {
+      const w=game.world.weather;
+      if(signal.mag>=5) return "SÉISME";
+      if(w.speed>=25) return "TEMPÊTE";
+      if(w.temperature>=33 && w.humidity<50) return "INCENDIE PORTUAIRE";
+      if(w.rain>=2) return "INONDATION";
+      return "HOULE";
+    }
+    function addLog(game,message) {
+      game.log.unshift({round:game.round,message});
+      game.log=game.log.slice(0,30);
+    }
+    function finish(game,winner) {
+      game.turn="over"; game.winner=winner;
+      addLog(game,winner==="you"?"Toutes les zones sont épuisées. La flotte tient encore.":"La flotte cargo est coulée. La Terre remporte la manche.");
+    }
+    function coinSound() {
+      if(!app.sound) return;
+      const Context=window.AudioContext || window.webkitAudioContext;
+      if(!Context) return;
+      try {
+        const context=app.audio || (app.audio=new Context());
+        if(context.state==="suspended") context.resume().catch(()=>{});
+        const oscillator=context.createOscillator(), gain=context.createGain(), time=context.currentTime;
+        oscillator.type="square";
+        oscillator.frequency.setValueAtTime(1046.5,time);
+        oscillator.frequency.setValueAtTime(2093,time+.065);
+        gain.gain.setValueAtTime(.0001,time);
+        gain.gain.exponentialRampToValueAtTime(.025,time+.008);
+        gain.gain.exponentialRampToValueAtTime(.0001,time+.18);
+        oscillator.connect(gain); gain.connect(context.destination);
+        oscillator.onended=()=>{oscillator.disconnect();gain.disconnect();};
+        oscillator.start(time); oscillator.stop(time+.19);
+      } catch (_) { /* A sound failure must not block a shot. */ }
+    }
+    function paintMusic() {
+      const music=window.PLAY_THE_END_HOST?window.PLAY_THE_END_HOST.state:$("game-music"), playing=!music.paused && app.musicEnabled && app.musicVolume>0;
+      const label=app.musicError?"Réessayer la musique":playing?"Mettre la musique en pause":"Lancer la musique";
+      $("music-controls").dataset.state=app.musicError?"error":playing?"playing":app.musicStarted?"paused":"idle";
+      $("music-toggle").title=label;
+      $("music-toggle").setAttribute("aria-label",label);
+      $("music-toggle").setAttribute("aria-pressed",String(playing));
+      const percent=Math.round(app.musicVolume*100);
+      $("music-volume").value=String(percent);
+      $("music-volume").setAttribute("aria-valuetext",percent+" %");
+      $("music-level").textContent=percent+"%";
+    }
+    async function startMusic() {
+      if(window.PLAY_THE_END_HOST) {
+        if(app.musicEnabled && app.musicVolume>0)window.PLAY_THE_END_HOST.send("play");
+        return;
+      }
+      const music=$("game-music");
+      if(!app.musicEnabled || app.musicVolume===0 || document.visibilityState==="hidden" || app.musicPending) return;
+      if(!music.paused) { paintMusic(); return; }
+      music.volume=app.musicVolume;
+      app.musicError=false;
+      try {
+        const pending=music.play();
+        app.musicPending=pending;
+        await pending;
+        app.musicStarted=true;
+        // A pause or volume change can happen while the browser is starting audio.
+        if(!app.musicEnabled || app.musicVolume===0 || document.visibilityState==="hidden") music.pause();
+      } catch (error) {
+        if(error.name!=="NotAllowedError" && error.name!=="AbortError") app.musicError=true;
+      } finally { app.musicPending=null; paintMusic(); }
+    }
+    function toggleMusic() {
+      if(window.PLAY_THE_END_HOST) {window.PLAY_THE_END_HOST.send("toggle");return;}
+      const music=$("game-music");
+      if(!music.paused || app.musicPending) {
+        app.musicEnabled=false;
+        music.pause();
+        paintMusic();
+      } else {
+        app.musicEnabled=true;
+        if(app.musicVolume===0) app.musicVolume=.25;
+        startMusic();
+      }
+    }
+    function setMusicVolume(value) {
+      if(window.PLAY_THE_END_HOST) {window.PLAY_THE_END_HOST.send("volume",Number(value));return;}
+      app.musicVolume=clamp(Number(value)/100);
+      const music=$("game-music");
+      music.volume=app.musicVolume;
+      if(app.musicVolume===0) music.pause();
+      else if(app.musicEnabled) startMusic();
+      paintMusic();
+    }
+    function setupMusic() {
+      const music=$("game-music");
+      $("music-toggle").addEventListener("click",toggleMusic);
+      $("music-volume").addEventListener("input",event=>setMusicVolume(event.target.value));
+      document.addEventListener("click",event=>{
+        if(event.target.closest("#game-screen") && !event.target.closest(".music-controls")) startMusic();
+      });
+      if(window.PLAY_THE_END_HOST) {
+        window.PLAY_THE_END_HOST.subscribe(state=>{
+          app.musicEnabled=state.enabled; app.musicVolume=state.volume;
+          app.musicStarted=state.started; app.musicError=state.error;
+          paintMusic();
+        });
+        window.PLAY_THE_END_HOST.send("ready");
+        return;
+      }
+      music.volume=app.musicVolume;
+      music.addEventListener("playing",paintMusic);
+      music.addEventListener("pause",paintMusic);
+      music.addEventListener("error",()=>{app.musicError=true;paintMusic();});
+      document.addEventListener("visibilitychange",()=>{
+        if(document.visibilityState==="hidden") music.pause();
+        else if(app.musicStarted) startMusic();
+      });
+      window.addEventListener("pagehide",()=>music.pause());
+      window.addEventListener("pageshow",()=>{if(app.musicStarted)startMusic();});
+      paintMusic();
+    }
+    function dollarFeedback(x,y) {
+      const button=$("targets").children[y*N+x];
+      if(!button) return;
+      button.setAttribute("data-dollar","1");
+      const graphic=document.createElement("img");
+      graphic.className="dollar-feedback"; graphic.alt=""; graphic.width=32; graphic.height=32;
+      graphic.setAttribute("aria-hidden","true");
+      graphic.src=reduceMotion.matches?"layout-publicite/dollar-clic-static.png":"layout-publicite/dollar-clic.gif?click="+(++app.dollarSequence);
+      button.replaceChildren(graphic);
+      window.setTimeout(()=>{
+        if(button.firstElementChild===graphic){button.replaceChildren();button.removeAttribute("data-dollar");}
+      },reduceMotion.matches?500:1840);
+      coinSound();
+    }
+    function playerShot(x,y) {
+      const game=app.game;
+      if(!game || game.turn!=="you") return;
+      const result=resolve(game.earth,game.onEarth,x,y);
+      if(!result) return;
+      dollarFeedback(x,y);
+      game.started=true;
+      if(result.kind==="hit") {
+        game.strain+=result.piece.kind==="forest"?2.8:2;
+        addLog(game,cellName(x,y)+" : touché, "+result.piece.name.toLowerCase()+(result.sunk?" ; zone épuisée.":"."));
+      } else addLog(game,cellName(x,y)+" : raté.");
+      const victory=allSunk(game.earth);
+      if(victory) { finish(game,"you"); paint(); return; }
+      game.turn="world";
+      paint();
+      window.setTimeout(()=>worldTurn(game),650);
+    }
+    async function worldTurn(game) {
+      if(app.game!==game || game.turn!=="world") return;
+      const random=rng(hash(game.world.seed+"|salvo|"+game.round));
+      const count=random()<.6*retaliation(game)?2:1;
+      if(count===2) addLog(game,"La pression du monde déclenche une salve double.");
+      for(let i=0;i<count;i++) {
+        if(i) await new Promise(resolveWait=>window.setTimeout(resolveWait,380));
+        if(app.game!==game || game.turn!=="world") return;
+        const shot=chooseEarthShot(game);
+        if(!shot) break;
+        game.earthShots++;
+        const result=resolve(game.player,game.onPlayer,shot.x,shot.y);
+        const event=hazard(game,shot.signal);
+        game.lastReply={...shot,event,kind:result.kind};
+        addLog(game,event+" en "+cellName(shot.x,shot.y)+" : "+(result.kind==="hit"?"touché, "+result.piece.name.toLowerCase()+(result.sunk?" coulé.":"."):"raté."));
+        if(allSunk(game.player)) { finish(game,"world"); paint(); return; }
+        paint();
+      }
+      game.round++; game.turn="you";
+      paint();
+    }
+    async function loadWorld() {
+      return worldData.loadWorld(REGION);
+    }
+    async function newGame() {
+      const previousLand=app.game?app.game.land.join(""):null;
+      for(const button of $("targets").children){button.replaceChildren();button.removeAttribute("data-dollar");}
+      const sequence=++app.sequence;
+      const playerSeed=(Math.random()*4294967296)>>>0;
+      const boardSeed=hash(playerSeed+"|session|"+sequence);
+      app.game=makeGame(DEMO,playerSeed,boardSeed);
+      app.game.turn="loading";
+      $("outcome").hidden=true;
+      paint();
+      const world=await loadWorld();
+      if(sequence!==app.sequence) return;
+      let game=makeGame(world,playerSeed,boardSeed);
+      for(let retry=1;retry<=32 && game.land.join("")===previousLand;retry++)game=makeGame(world,playerSeed,(boardSeed+retry)>>>0);
+      app.game=game;
+      addLog(app.game,"La Terre a placé ses zones secrètes sur terre et en mer. À vous.");
+      paint();
+    }
+    function shuffleFleet() {
+      const game=app.game;
+      if(!game || game.started || game.turn!=="you") return;
+      game.player=makeFleet(SHIPS,(Math.random()*4294967296)>>>0);
+      paint();
+    }
+    function returnHome() {
+      if(window.PLAY_THE_END_HOST) {window.PLAY_THE_END_HOST.send("home");return;}
+      app.musicEnabled=false;
+      $("game-music").pause();
+      window.location.assign("accueil/proposition.html");
+    }
+    function makeTargets() {
+      const fragment=document.createDocumentFragment();
+      for(let y=0;y<N;y++) for(let x=0;x<N;x++) {
+        const button=document.createElement("button");
+        button.type="button"; button.className="target"; button.dataset.x=x; button.dataset.y=y;
+        button.setAttribute("aria-label","Sonder "+cellName(x,y));
+        button.title=cellName(x,y);
+        button.addEventListener("click",()=>playerShot(x,y));
+        fragment.append(button);
+      }
+      $("targets").replaceChildren(fragment);
+    }
+    function healthRow(len,hits,className) {
+      const row=document.createElement("span"); row.className=className;
+      for(let i=0;i<len;i++) { const point=document.createElement("i"); if(i<hits) point.className=className==="health"?"used":"found"; row.append(point); }
+      return row;
+    }
+    function paint() {
+      const game=app.game;
+      if(!game) return;
+      const loading=game.turn==="loading", over=game.turn==="over";
+      const region=worldData.regionFor(game.world.regionId);
+      $("region-label").textContent=region.label+" · "+String(region.number).padStart(2,"0")+" / 10";
+      $("new-game").disabled=loading || over;
+      $("home").disabled=over;
+      $("data-toggle").disabled=over;
+      $("sound-toggle").disabled=over;
+      $("music-toggle").disabled=over;
+      $("music-volume").disabled=over;
+      $("shuffle").disabled=loading || game.started || over;
+      $("status").dataset.turn=game.turn;
+      $("turn-number").textContent=String(game.round).padStart(2,"0");
+      $("status-text").textContent=loading?"Lecture des signaux du monde...":over?(game.winner==="you"?"Victoire. Toutes les zones secrètes sont révélées.":"Contact perdu. La flotte est coulée."):(game.turn==="world"?"La Terre riposte...":"À vous. Choisissez une case.");
+      for(const button of $("targets").children) {
+        const x=Number(button.dataset.x),y=Number(button.dataset.y), shot=game.onEarth.get(key(x,y));
+        button.disabled=game.turn!=="you" || Boolean(shot);
+        button.removeAttribute("data-result");
+        let label=cellName(x,y);
+        if(shot) {
+          if(shot.kind==="miss") {label+=" : raté, "+missMark(game,x,y).label;button.dataset.result="miss";}
+          else {
+            const piece=game.earth.pieces[shot.index], depleted=sunk(piece);
+            label+=" : touché, "+piece.name+(depleted?", zone épuisée":"");
+            button.dataset.result=depleted?"sunk":"hit";
+          }
+        } else if(over && game.earth.map.has(key(x,y))) {
+          const piece=game.earth.pieces[game.earth.map.get(key(x,y))]; label+=" : "+piece.name+" révélée";
+        } else label="Sonder "+label;
+        button.title=label; button.setAttribute("aria-label",label);
+      }
+      $("fleet-list").replaceChildren(...game.player.pieces.map((piece,index)=>legendItem(piece,index,true)));
+      $("resources").replaceChildren(...game.earth.pieces.map((piece,index)=>legendItem(piece,index,false)));
+      const hits=game.player.pieces.reduce((sum,piece)=>sum+piece.hits.size,0);
+      const depleted=game.earth.pieces.filter(sunk).length;
+      const remaining=game.player.pieces.filter(piece=>!sunk(piece)).length;
+      $("fleet-count").textContent=remaining+" CARGOS EN MER";
+      $("fleet-hits").textContent="INTÉGRITÉ "+(17-hits)+" / 17";
+      $("earth-hits").textContent="ZONES ÉPUISÉES "+depleted+" / "+game.earth.pieces.length;
+      $("last-reply").textContent=game.lastReply?game.lastReply.event+" / "+cellName(game.lastReply.x,game.lastReply.y)+(game.lastReply.kind==="hit"?" TOUCHÉ":" RATÉ"):"AUCUN TIR ADVERSE";
+      const last=[...game.onEarth.entries()].at(-1);
+      $("last-shot").textContent=last?cellName(...last[0].split(",").map(Number))+" / "+(last[1].kind==="hit"?"TOUCHÉ":"RATÉ"):"AUCUNE CASE SONDÉE";
+      const eco=Math.round(pressure(game)*100), reply=Math.round(retaliation(game)*100);
+      $("cat-value").textContent=eco+"%"; $("cat-bar").style.width=eco+"%";
+      const level=eco>=75?"high":eco>=45?"medium":"low";
+      $("lamps").dataset.level=level;
+      $("lamps").setAttribute("aria-label","Tension "+(level==="high"?"rouge":level==="medium"?"ambre":"verte"));
+      $("room").style.setProperty("--world-darkness",String(Math.min(.45,game.strain/80)));
+      $("room").dataset.over=over?game.winner:"";
+      $("stress-value").textContent=eco+" / 100"; $("stress-bar").style.width=eco+"%";
+      $("reply-value").textContent=reply+" / 100"; $("reply-bar").style.width=reply+"%";
+      $("salvo-value").textContent=Math.round(.6*retaliation(game)*100)+" % DE SALVE DOUBLE";
+      renderSources(game.world,loading);
+      $("shot-count").textContent=game.onEarth.size+" CASES SONDÉES";
+      $("log").replaceChildren(...game.log.map(item=>{
+        const li=document.createElement("li"),time=document.createElement("time"),text=document.createElement("span");
+        time.textContent="TOUR "+String(item.round).padStart(2,"0"); text.textContent=item.message; li.append(time,text); return li;
+      }));
+      const endingWasHidden=$("outcome").hidden;
+      $("outcome").hidden=!over;
+      if(over) {
+        if(endingWasHidden)$("outcome").dataset.imageError="false";
+        $("outcome").dataset.metal=game.winner==="you"?"silver":"gold";
+        $("outcome-title").textContent=game.winner==="you"?"CONGRATULATIONS!":"THE EARTH WINS!";
+        $("outcome-message").textContent=game.winner==="you"?"You bought every resource in the region and saved a few trinkets aboard your fleet!":"Your goods are floating in the ocean... You haven't understood a thing!";
+        $("outcome-score").textContent="SHIPS AFLOAT: "+remaining+" / "+game.player.pieces.length;
+        updateMotionAssets();
+        if(endingWasHidden)$("ending-replay").focus();
+      } else $("outcome-score").textContent="";
+      drawFleet(); drawRegion();
+    }
+    function updateMotionAssets() {
+      const banner="sprites-interface/banner"+(reduceMotion.matches?"-static.png":".gif");
+      if($("promo-art").getAttribute("src")!==banner)$("promo-art").setAttribute("src",banner);
+      const weather="sprites-cataclysme/tempete"+(reduceMotion.matches?"-static.png":".gif");
+      if($("fleet-weather").getAttribute("src")!==weather)$("fleet-weather").setAttribute("src",weather);
+      if(!$("outcome").hidden) {
+        const src="sprites-fin/v2/"+$("outcome").dataset.metal+(reduceMotion.matches?"-static.png":".gif");
+        if($("outcome-art").getAttribute("src")!==src)$("outcome-art").setAttribute("src",src);
+      }
+    }
+    function renderSources(world,loading) {
+      const w=world.weather;
+      $("wind-value").textContent=Math.round(w.speed)+" km/h · "+Math.round(w.direction)+"°";
+      $("heat-value").textContent=Math.round(w.temperature)+" °C / "+Math.round(w.humidity)+" %";
+      $("air-value").textContent=Math.round(world.air.pm)+" µg/m³";
+      $("quake-value").textContent=world.quakes.length+" / 1 000 km";
+      const naval=window.PLAY_THE_END_SHIPPING?.describe(world.shipping);
+      $("naval-value").textContent=naval?.count || "À raccorder";
+      $("naval-date").textContent=naval?.detail || "Pilote : Suez seulement";
+      $("naval-date").title=naval?.title || "";
+      const count=Object.values(world.live).filter(Boolean).length;
+      $("session-mode").textContent=loading?"DATA...":count===3?"DATA 3/3":count?"DATA "+count+"/3":"DÉMO";
+      $("weather-source").textContent=loading?"CHARGEMENT":count===3?"3 SOURCES CONNECTÉES":count?count+" / 3 SOURCES CONNECTÉES":"MODE DÉMO / HORS LIGNE";
+      $("weather-source").className="mode"+(count===3?"":" demo");
+      const modes=["météo","air","séismes"].filter((_,i)=>!Object.values(world.live)[i]);
+      $("source-note").textContent="Carte et ressources procédurales, pas des gisements mesurés. Météo et air modélisés ; séismes USGS sur 24 h dans un rayon de 1 000 km. "+(modes.length?"Repli de démo : "+modes.join(", ")+". ":"")+"Indices et catastrophes : règles de jeu. PortWatch : comptage quotidien pilote à Suez, pas des positions en direct. Au-delà de 7 jours ou sans historique complet : aucun effet naval. Sinon, pression supplémentaire plafonnée à +8 points par rapport aux 28 jours précédents. Flotte fixe.";
+      $("source-time").textContent=world.stamp==="DEMO"?"DÉMO":world.stamp.slice(11,16)+" UTC";
+    }
+    function polygon(ctx,points,color) {
+      ctx.fillStyle=color; ctx.beginPath(); ctx.moveTo(points[0][0],points[0][1]);
+      for(let i=1;i<points.length;i++) ctx.lineTo(points[i][0],points[i][1]);
+      ctx.closePath(); ctx.fill();
+    }
+    function iso(x,y,z=0) { return {x:160+(x-y)*12,y:24+(x+y)*6-z}; }
+    function tilePoints(x,y,z=0) {
+      return [iso(x,y,z),iso(x+1,y,z),iso(x+1,y+1,z),iso(x,y+1,z)].map(p=>[p.x,p.y]);
+    }
+    function drawFleet() {
+      const game=app.game;
+      if(!game) return;
+      const ctx=fleetCtx; ctx.clearRect(0,0,320,176);
+      ctx.save(); ctx.translate(-32,-4); ctx.scale(1.2,1.2);
+      polygon(ctx,[[40,84],[160,144],[280,84],[280,90],[160,150],[40,90]],"#093c52");
+      const fleet=game.player;
+      for(let sum=0;sum<19;sum++) for(let x=0;x<N;x++) {
+        const y=sum-x; if(!inside(x,y)) continue;
+        const shot=game.onPlayer.get(key(x,y)),points=tilePoints(x,y);
+        const color=shot && shot.kind==="hit"?"#733f3b":((x+y)%3===0?"#0873a2":"#08668c");
+        polygon(ctx,points,color);
+        ctx.strokeStyle="#4aabb675";ctx.lineWidth=.4;ctx.beginPath();points.forEach((p,i)=>i?ctx.lineTo(...p):ctx.moveTo(...p));ctx.closePath();ctx.stroke();
+        const center=iso(x+.5,y+.5);
+        if((x*3+y*7)%5===0 && !(shot&&shot.kind==="hit"))drawWater(ctx,center.x,center.y,(x+y)%2,x+y,true);
+        if(shot && shot.kind==="miss") { ctx.fillStyle="#e9ecc8";ctx.fillRect(Math.round(center.x)-1,Math.round(center.y)-1,2,2); }
+      }
+      const ordered=[...fleet.pieces].sort((a,b)=>(a.cells[0].x+a.cells[0].y)-(b.cells[0].x+b.cells[0].y));
+      for(const piece of ordered) {drawVessel(ctx,piece);drawVesselDamage(ctx,piece);}
+      ctx.fillStyle="#c7ddc7";ctx.font="6px monospace";
+      for(let i=0;i<N;i++) {
+        const top=iso(i+.5,-.25),left=iso(-.45,i+.5);
+        ctx.fillText(String(i+1),top.x-2,top.y-3);
+        ctx.fillText("ABCDEFGHIJ"[i],left.x-7,left.y+3);
+      }
+      ctx.fillStyle="#8ba991";ctx.fillText("N",152,15);
+      if(game.lastReply) {
+        const p=iso(game.lastReply.x+.5,game.lastReply.y+.5);
+        ctx.strokeStyle="#f5d370";ctx.lineWidth=1;ctx.strokeRect(Math.round(p.x)-5,Math.round(p.y)-5,10,10);
+      }
+      ctx.restore();
+    }
+    function drawVessel(ctx,piece) {
+      if(drawNavalSprite(ctx,piece))return;
+      const first=piece.cells[0],last=piece.cells.at(-1);
+      const sign=piece.vertical?-1:1,dx=sign*8,dy=4;
+      const outline=piece.vertical?
+        [[first.x+.16,first.y+.1],[first.x+.16,last.y+.83],[first.x+.5,last.y+1.1],[first.x+.84,last.y+.83],[first.x+.84,first.y+.1],[first.x+.5,first.y-.08]]:
+        [[first.x+.1,first.y+.16],[last.x+.83,first.y+.16],[last.x+1.1,first.y+.5],[last.x+.83,first.y+.84],[first.x+.1,first.y+.84],[first.x-.08,first.y+.5]];
+      const top=outline.map(([x,y])=>{const p=iso(x,y,4);return [p.x,p.y];});
+      polygon(ctx,top.map(([x,y])=>[x,y+4]),sunk(piece)?"#733e35":"#23383d");
+      polygon(ctx,top.map(([x,y])=>[x,y+2]),sunk(piece)?"#733e35":"#bb593e");
+      polygon(ctx,top,sunk(piece)?"#914b3a":piece.kind==="tanker"?"#be573e":"#dce1c8");
+      if(sunk(piece)) return;
+      if(piece.kind==="ro") {
+        polygon(ctx,top.map(([x,y])=>[x,y-5]),"#f0f0d9");
+        polygon(ctx,[top[3],top[4],[top[4][0],top[4][1]-5],[top[3][0],top[3][1]-5]],"#b6c8bb");
+      }
+      for(let i=0;i<piece.cells.length;i++) {
+        const c=piece.cells[i],p=iso(c.x+.5,c.y+.5,5);
+        if(piece.kind==="container") {
+          const colors=["#d96145","#e7c455","#59aca6","#e8e4c4"];
+          block(ctx,p.x-2,p.y,8,3,3,colors[i%colors.length]);
+          block(ctx,p.x+2,p.y-3,6,3,3,colors[(i+1)%colors.length]);
+        } else if(piece.kind==="bulk") block(ctx,p.x,p.y,9,4,2,"#b6b69b");
+        else if(piece.kind==="tanker") {
+          ctx.fillStyle="#f1c86d";ctx.fillRect(Math.round(p.x)-3,Math.round(p.y)-1,6,1);ctx.fillRect(Math.round(p.x),Math.round(p.y)-3,1,4);
+        } else if(piece.kind==="ro") {
+          ctx.fillStyle="#687f79";ctx.fillRect(Math.round(p.x),Math.round(p.y)-6,2,1);
+        }
+        else {
+          ctx.fillStyle="#e8c263";ctx.fillRect(Math.round(p.x),Math.round(p.y)-8,1,9);ctx.fillRect(Math.round(p.x),Math.round(p.y)-8,sign*5||5,1);
+        }
+      }
+      const cabin=iso(first.x+.5,first.y+.5,8);
+      block(ctx,cabin.x-dx*.2,cabin.y-1,5,3,5,"#f0efdc");
+      ctx.fillStyle="#ce6344";ctx.fillRect(Math.round(cabin.x)-1,Math.round(cabin.y)-9,2,3);
+      ctx.fillStyle="#405c64";ctx.fillRect(Math.round(cabin.x)-2,Math.round(cabin.y)-3,2,1);
+    }
+    function vesselSprite(piece) {
+      const sprite=app.navalSprites.get(piece.kind);
+      if(!sprite)return null;
+      const direction=piece.vertical?1:0, state=sunk(piece)?2:piece.hits.size?1:0;
+      const frame=sprite.spec.frames[state*2+direction];
+      const referenceWidth=Math.max(...sprite.spec.frames.filter((_,index)=>index%2===direction).map(view=>view.w));
+      const scale=(piece.len*12+4)/referenceWidth;
+      const first=piece.cells[0],last=piece.cells.at(-1);
+      const center=iso((first.x+last.x)/2+.5,(first.y+last.y)/2+.5);
+      const bow=iso(last.x+.5,last.y+.5);
+      const width=Math.round(frame.w*scale),height=Math.round(frame.h*scale);
+      return {image:sprite.image,frame,state,direction,x:Math.round(center.x-width/2),y:Math.round(bow.y+3-height),width,height};
+    }
+    function drawNavalSprite(ctx,piece) {
+      const sprite=vesselSprite(piece);
+      if(!sprite)return false;
+      const {image,frame,x,y,width,height}=sprite;
+      ctx.drawImage(image,frame.x,frame.y,frame.w,frame.h,x,y,width,height);
+      return true;
+    }
+    function drawVesselDamage(ctx,piece) {
+      if(!piece.hits.size)return;
+      const damaged=piece.cells.filter(cell=>piece.hits.has(key(cell.x,cell.y)));
+      const count=Math.min(3,damaged.length), destroyed=sunk(piece);
+      ctx.save();
+      for(let i=0;i<count;i++) {
+        const cell=damaged[Math.round(i*(damaged.length-1)/Math.max(1,count-1))];
+        const p=iso(cell.x+.5,cell.y+.5,destroyed?8:10);
+        const x=Math.round(p.x),y=Math.round(p.y);
+        const flicker=reduceMotion.matches?0:(app.phase+cell.x+cell.y)%2;
+        const height=Math.min(y-6,(destroyed?17:11)+Math.round(piece.hits.size/piece.len*4)+flicker*2);
+        const smokeY=Math.max(6,y-height-15-flicker*3);
+        ctx.globalAlpha=.75;
+        ctx.fillStyle="#263039";
+        ctx.fillRect(x-2+flicker,smokeY+10,8,7);
+        ctx.fillRect(x-4-flicker,smokeY+4,11,8);
+        ctx.fillStyle="#697177";
+        ctx.fillRect(x-2-flicker,smokeY,8,5);
+        ctx.fillRect(x+4-flicker,smokeY+3,5,5);
+        ctx.globalAlpha=1;
+        ctx.fillStyle="#982a36";ctx.fillRect(x-6,y-3,12,5);
+        ctx.fillStyle="#ed432e";
+        ctx.fillRect(x-5,y-8,10,8);
+        ctx.fillRect(x-3,y-height+3,6,height-3);
+        ctx.fillRect(x+2-flicker*2,y-height,2,7);
+        ctx.fillStyle="#ff923f";
+        ctx.fillRect(x-3,y-9-flicker*2,6,9+flicker*2);
+        ctx.fillRect(x-1,y-height+4,3,height-5);
+        ctx.fillStyle="#ffe580";
+        ctx.fillRect(x-1,y-6,3,6);
+        ctx.fillRect(x+flicker,y-10-flicker*2,1,6);
+        ctx.fillStyle="#ffc04c";ctx.fillRect(x-4+flicker*6,Math.max(6,y-height-4),1,2);
+      }
+      ctx.restore();
+    }
+    function loadNavalSprites() {
+      if(typeof Image!=="function" || !window.NAVAL_SPRITES)return;
+      for(const [kind,spec] of Object.entries(window.NAVAL_SPRITES)) {
+        const image=new Image();
+        image.onload=()=>{app.navalSprites.set(kind,{image,spec});paint();};
+        // The procedural hull remains available if a local asset cannot load.
+        image.onerror=()=>{};
+        image.src="sprites-navals/versions/"+spec.file;
+      }
+    }
+    function loadWaterSprites() {
+      if(typeof Image!=="function" || !window.WATER_SPRITES)return;
+      const image=new Image(),spec=window.WATER_SPRITES;
+      image.onload=()=>{app.waterSprite={image,spec};drawFleet();drawRegion();};
+      image.onerror=()=>{};
+      image.src="sprites-mer/"+spec.file;
+    }
+    function drawWater(ctx,x,y,family,offset,isometric=false) {
+      const sprite=app.waterSprite;
+      if(!sprite) {
+        ctx.fillStyle="#65c6cc";ctx.fillRect(Math.round(x)-3+(reduceMotion.matches?0:app.phase),Math.round(y),4,1);
+        return;
+      }
+      const frame=sprite.spec.frames[family*3+((reduceMotion.matches?0:app.waterFrame)+offset)%3];
+      const width=isometric?26:20,height=isometric?12:9;
+      ctx.save();ctx.globalAlpha=isometric?.8:.65;
+      ctx.drawImage(sprite.image,frame.x,frame.y,frame.w,frame.h,Math.round(x-width/2),Math.round(y-height/2),width,height);
+      ctx.restore();
+    }
+    function loadMapSprites() {
+      if(typeof Image!=="function" || !window.MAP_SPRITES)return;
+      const image=new Image(),spec=window.MAP_SPRITES;
+      image.onload=()=>{app.mapSprite={image,spec};drawRegion();};
+      image.onerror=()=>{};
+      image.src="sprites-map/lot-1/"+spec.file;
+    }
+    function loadCommandSprites() {
+      if(typeof Image!=="function")return;
+      const image=new Image();
+      image.onload=()=>{$("header-controls").dataset.sprites="ready";};
+      image.onerror=()=>{$("header-controls").dataset.sprites="fallback";};
+      image.src="sprites-interface/commands-v1.png";
+    }
+    function loadResourceSprites() {
+      if(typeof Image!=="function" || !window.RESOURCE_SPRITES)return;
+      const image=new Image(),spec=window.RESOURCE_SPRITES;
+      image.onload=()=>{app.resourceSprites={image,spec};paint();};
+      image.onerror=()=>{};
+      image.src="sprites-map/lot-1/"+spec.file;
+    }
+    function drawResourceSprite(ctx,index,x,y) {
+      const sprite=app.resourceSprites,frame=sprite?.spec.frames[index];
+      if(!frame)return false;
+      // Reduce each icon once so every tile and menu copy uses the same pixels.
+      if(!sprite.icons)sprite.icons=[];
+      if(!sprite.icons[index]) {
+        const canvas=document.createElement("canvas");canvas.width=24;canvas.height=24;
+        const iconCtx=canvas.getContext("2d"),scale=Math.min(22/frame.w,22/frame.h),w=Math.round(frame.w*scale),h=Math.round(frame.h*scale);
+        iconCtx.imageSmoothingEnabled=false;
+        iconCtx.drawImage(sprite.image,frame.x,frame.y,frame.w,frame.h,Math.round(12-w/2),Math.round(12-h/2),w,h);
+        sprite.icons[index]=iconCtx.canvas;
+      }
+      ctx.save();ctx.beginPath();ctx.rect(x-11,y-11,22,22);ctx.clip();
+      ctx.drawImage(sprite.icons[index],x-12,y-12);
+      ctx.restore();return true;
+    }
+    function legendItem(piece,index,fleet) {
+      const row=document.createElement("button");row.type="button";
+      row.className=fleet?"fleet-row"+(sunk(piece)?" sunk":""):"resource"+(sunk(piece)?" depleted":"");
+      const value=fleet?piece.len-piece.hits.size:piece.hits.size;
+      const label=piece.name+" : "+value+"/"+piece.len+(fleet?" cases intactes":" cases découvertes")+(sunk(piece)?fleet?" / coulé":" / épuisée":"");
+      row.setAttribute("aria-label",label);
+      const tooltip=document.createElement("span");tooltip.className="ledger-tooltip";tooltip.textContent=label;tooltip.setAttribute("role","tooltip");
+      tooltip.id=(fleet?"ship-detail-":"resource-detail-")+index;row.setAttribute("aria-describedby",tooltip.id);
+      const canvas=document.createElement("canvas");canvas.width=fleet?40:24;canvas.height=24;canvas.className="ledger-sprite";canvas.setAttribute("aria-hidden","true");
+      const ctx=canvas.getContext("2d");ctx.imageSmoothingEnabled=false;
+      const sprite=fleet?app.navalSprites.get(piece.kind):app.resourceSprites;
+      if(sprite && !fleet)drawResourceSprite(ctx,index,12,12);
+      else if(sprite) {
+        const state=sunk(piece)?2:piece.hits.size?1:0;
+        const frame=sprite.spec.frames[fleet?state*2:index],scale=Math.min((canvas.width-2)/frame.w,22/frame.h),w=Math.round(frame.w*scale),h=Math.round(frame.h*scale);
+        ctx.drawImage(sprite.image,frame.x,frame.y,frame.w,frame.h,Math.round((canvas.width-w)/2),Math.round((24-h)/2),w,h);
+      } else if(fleet) {
+        ctx.fillStyle=sunk(piece)?"#a75b4d":"#cbd5ba";ctx.fillRect(3,15,34,5);
+        ctx.fillStyle="#4c898b";ctx.fillRect(26,6,6,9);
+        ctx.fillStyle=piece.hits.size?"#e16945":"#e4bb66";for(let i=0;i<piece.len;i++)ctx.fillRect(4+i*4,10,3,5);
+      } else {ctx.save();ctx.translate(12,12);ctx.scale(1.5,1.5);drawResource(ctx,piece.kind,0,0,sunk(piece));ctx.restore();}
+      const status=document.createElement("span");status.className="ledger-status";
+      const count=document.createElement("span");count.className="ledger-count";count.textContent=value+"/"+piece.len;
+      status.append(count);if(fleet)status.append(healthRow(piece.len,piece.hits.size,"health"));
+      row.append(canvas,status,tooltip);return row;
+    }
+    function block(ctx,x,y,width,depth,height,color) {
+      x=Math.round(x);y=Math.round(y);
+      polygon(ctx,[[x-width/2,y-height],[x,y-depth-height],[x+width/2,y-height],[x,y+depth-height]],color);
+      polygon(ctx,[[x-width/2,y-height],[x,y+depth-height],[x,y+depth],[x-width/2,y]],"#718776");
+      polygon(ctx,[[x,y+depth-height],[x+width/2,y-height],[x+width/2,y],[x,y+depth]],color);
+    }
+    function drawRegion() {
+      const game=app.game;
+      if(!game) return;
+      const ctx=regionCtx;ctx.fillStyle="#000000";ctx.fillRect(0,0,280,280);
+      for(let y=0;y<N;y++) for(let x=0;x<N;x++) {
+        const px=20+x*24,py=20+y*24,land=onLand(x,y,game.land);
+        ctx.fillStyle=land?((x+y)%3===0?"#73955d":"#688b55"):((x+y)%2?"#0f6990":"#11759c");
+        ctx.fillRect(px,py,24,24);
+        if(!land && (x+y)%3===0)drawWater(ctx,px+12,py+12,(x+y)%2,x+y);
+        if(land) {
+          const sprite=app.mapSprite;
+          if(sprite) {
+            // Decoration is seeded only from terrain, never from hidden resources.
+            const frame=sprite.spec.frames[hash(game.land.join("")+"|ground|"+x+","+y)%sprite.spec.frames.length];
+            ctx.drawImage(sprite.image,frame.x,frame.y,frame.w,frame.h,px,py,24,24);
+          } else {ctx.fillStyle="#627f4f";ctx.fillRect(px+4+(x%3),py+5,3,2);ctx.fillRect(px+16,py+18,2,2);}
+          ctx.fillStyle="#b4b878";
+          if(!onLand(x-1,y,game.land))ctx.fillRect(px,py,2,24);
+          if(!onLand(x+1,y,game.land))ctx.fillRect(px+22,py,2,24);
+          if(!onLand(x,y-1,game.land))ctx.fillRect(px,py,24,2);
+          if(!onLand(x,y+1,game.land))ctx.fillRect(px,py+22,24,2);
+        }
+        const shot=game.onEarth.get(key(x,y)),index=game.earth.map.get(key(x,y));
+        const reveal=game.turn==="over" && index!==undefined;
+        if((shot&&shot.kind==="hit") || reveal) {
+          const piece=game.earth.pieces[index],depleted=sunk(piece);
+          ctx.fillStyle="#000000";ctx.fillRect(px+1,py+1,22,22);
+          if(!drawResourceSprite(ctx,index,px+12,py+12))drawResource(ctx,piece.kind,px+12,py+12,depleted);
+        } else if(shot && shot.kind==="miss") drawMissMark(ctx,game,x,y,px,py);
+      }
+      ctx.fillStyle="#d8e6cb";ctx.font="9px monospace";
+      for(let i=0;i<N;i++) {ctx.fillText("ABCDEFGHIJ"[i],29+i*24,12);ctx.fillText(String(i+1),7,36+i*24);}
+      const region=worldData.regionFor(game.world.regionId);
+      ctx.fillStyle="#c1d4bc";ctx.font="6px monospace";ctx.fillText(region.label+" / REGION "+String(region.number).padStart(2,"0"),20,270);
+    }
+    function missMark(game,x,y) {
+      const marks=MISS_MARKS[onLand(x,y,game.land)?"land":"sea"];
+      return marks[hash(game.mapSeed+"|scar|"+x+","+y)%marks.length];
+    }
+    function drawMissMark(ctx,game,x,y,px,py) {
+      const land=onLand(x,y,game.land),mark=missMark(game,x,y).kind;
+      // Scars stay inside their searched tile, never over a neighbouring hidden cell.
+      ctx.save();ctx.beginPath();ctx.rect(px+1,py+1,22,22);ctx.clip();
+      ctx.fillStyle=land?"#52574d":"#172e39";ctx.fillRect(px+1,py+1,22,22);
+      ctx.fillStyle=land?"#7f806c":"#274351";
+      for(let i=0;i<5;i++)ctx.fillRect(px+3+(i*7+x)%17,py+3+(i*5+y)%17,2,1);
+      if(mark==="dry") {
+        ctx.fillStyle=land?"#333b33":"#0a151e";
+        ctx.fillRect(px+5,py+7,7,2);ctx.fillRect(px+10,py+9,2,7);ctx.fillRect(px+11,py+13,7,2);
+        ctx.fillRect(px+4,py+17,5,1);ctx.fillRect(px+17,py+4,2,5);
+        if(!land){ctx.fillStyle="#777473";ctx.fillRect(px+4,py+4,3,2);ctx.fillStyle="#b48173";ctx.fillRect(px+17,py+18,2,2);}
+      } else if(mark==="fire") {
+        ctx.fillStyle="#313d40";ctx.fillRect(px+7,py+3,8,4);ctx.fillRect(px+10,py+5,7,3);
+        ctx.fillStyle="#9d3435";ctx.fillRect(px+5,py+13,14,7);
+        ctx.fillStyle="#f06032";ctx.fillRect(px+7,py+10,10,9);ctx.fillRect(px+9,py+7,3,9);ctx.fillRect(px+15,py+8,2,8);
+        ctx.fillStyle="#ffc35d";ctx.fillRect(px+9,py+13,6,6);ctx.fillRect(px+11,py+10,3,8);
+        ctx.fillStyle="#fff0a1";ctx.fillRect(px+11,py+15,3,4);
+      } else if(mark==="cactus") {
+        ctx.fillStyle="#283e36";ctx.fillRect(px+9,py+4,6,16);ctx.fillRect(px+4,py+7,4,8);ctx.fillRect(px+15,py+10,5,6);
+        ctx.fillStyle="#75aa68";ctx.fillRect(px+10,py+5,4,14);ctx.fillRect(px+5,py+8,2,6);ctx.fillRect(px+6,py+12,5,2);ctx.fillRect(px+14,py+13,4,2);ctx.fillRect(px+17,py+11,2,3);
+        ctx.fillStyle="#b5c58a";ctx.fillRect(px+11,py+6,1,11);ctx.fillRect(px+5,py+8,1,4);
+        ctx.fillStyle="#333b33";ctx.fillRect(px+7,py+20,10,1);
+      } else {
+        const rows=["WW............WW","WW............WW",".WW..........WW.","..WW..WWWW..WW..","...WWWWWWWWWW...","....WWWWWWWW....","....WWKWWKWW....","....WWKWWKWW....",".....WWWWWW.....",".....WWKKWW.....","......WKKW......","......WWWW......","......W..W......"];
+        for(let yy=0;yy<rows.length;yy++)for(let xx=0;xx<rows[yy].length;xx++)if(rows[yy][xx]!==".") {
+          ctx.fillStyle=rows[yy][xx]==="W"?"#e8e2bc":"#162725";ctx.fillRect(px+4+xx,py+5+yy,1,1);
+        }
+      }
+      ctx.restore();
+    }
+    function drawResource(ctx,kind,x,y,depleted) {
+      ctx.fillStyle=depleted?"#ece2b8":"#344d3b";
+      if(kind==="forest") {ctx.fillRect(x-2,y-6,4,2);ctx.fillRect(x-4,y-4,8,3);ctx.fillRect(x-5,y-1,10,3);ctx.fillRect(x-1,y+2,2,4);}
+      else if(kind==="water") {ctx.fillRect(x-1,y-5,2,2);ctx.fillRect(x-3,y-3,6,3);ctx.fillRect(x-4,y,8,3);ctx.fillRect(x-2,y+3,4,2);}
+      else if(kind==="mineral") {ctx.fillRect(x-2,y-5,5,2);ctx.fillRect(x-4,y-3,8,6);ctx.fillRect(x-1,y+3,6,2);}
+      else {ctx.fillRect(x-5,y+2,10,2);ctx.fillRect(x-3,y-1,7,3);ctx.fillRect(x-1,y-4,4,3);}
+    }
+    let lastFrame=-1,lastWaterFrame=-1;
+    function animate(time) {
+      const phase=Math.floor(time/430)%2,waterFrame=Math.floor(time/320)%3;
+      if(phase!==lastFrame || waterFrame!==lastWaterFrame) {
+        lastFrame=phase;lastWaterFrame=waterFrame;app.phase=phase;app.waterFrame=waterFrame;drawFleet();drawRegion();
+      }
+      app.animation=requestAnimationFrame(animate);
+    }
+    function fitStage(width=window.innerWidth,height=window.innerHeight) {
+      const scale=Math.max(0,Math.min(width/1536,height/864));
+      $("game-stage").style.setProperty("--stage-scale",String(scale));
+    }
+    function boot() {
+      if(document.documentElement.dataset.entry==="home")return;
+      fitStage();
+      window.addEventListener("resize",()=>fitStage());
+      makeTargets();
+      setupMusic();
+      loadNavalSprites();
+      loadWaterSprites();
+      loadMapSprites();
+      loadResourceSprites();
+      loadCommandSprites();
+      updateMotionAssets();
+      $("promo-art").addEventListener("load",()=>{$("promo-strip").dataset.imageError="false";});
+      $("promo-art").addEventListener("error",()=>{$("promo-strip").dataset.imageError="true";});
+      $("fleet-weather").addEventListener("error",()=>{$("fleet-weather").hidden=true;});
+      $("outcome-art").addEventListener("error",()=>{$("outcome").dataset.imageError="true";});
+      document.addEventListener("keydown",event=>{
+        if(app.game?.turn==="over" && event.key==="Tab") {
+          event.preventDefault();
+          const replay=$("ending-replay"),home=$("ending-home");
+          (document.activeElement===replay?home:replay).focus();return;
+        }
+      });
+      $("sound-toggle").addEventListener("click",()=>{
+        app.sound=!app.sound;
+        const label=app.sound?"Couper les effets sonores":"Activer les effets sonores";
+        $("sound-toggle").title=label; $("sound-toggle").setAttribute("aria-label",label);
+        $("sound-toggle").setAttribute("aria-pressed",String(app.sound));
+      });
+      $("data-toggle").addEventListener("click",()=>{
+        const screen=$("game-screen"),open=screen.dataset.panel!=="data";
+        screen.dataset.panel=open?"data":"";
+        $("data-toggle").setAttribute("aria-expanded",String(open));
+      });
+      $("new-game").addEventListener("click",newGame);
+      $("ending-replay").addEventListener("click",()=>{newGame();$("game-screen").focus();});
+      $("ending-home").addEventListener("click",returnHome);
+      $("home").addEventListener("click",returnHome);
+      $("shuffle").addEventListener("click",shuffleFleet);
+      window.addEventListener("pagehide",()=>cancelAnimationFrame(app.animation));
+      window.addEventListener("pageshow",()=>{if(!reduceMotion.matches){cancelAnimationFrame(app.animation);app.animation=requestAnimationFrame(animate);}});
+      reduceMotion.addEventListener("change",()=>{updateMotionAssets();cancelAnimationFrame(app.animation);if(!reduceMotion.matches)app.animation=requestAnimationFrame(animate);});
+      newGame();
+      if(!reduceMotion.matches)app.animation=requestAnimationFrame(animate);
+    }
+    boot();
+  })();
+  </script>
+</body>
+</html>

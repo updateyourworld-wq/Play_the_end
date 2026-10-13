@@ -1,0 +1,369 @@
+{
+  "name": "Play The End",
+  "version": "prototype-test-2026-10-13-v17",
+  "entry": "index.html",
+  "published": false,
+  "verification": "DOM/audio simulations and native Canvas; no browser production test",
+  "assets": [
+    {
+      "file": "accueil/accueil.css",
+      "bytes": 6711,
+      "sha256": "f6eba847b6c2387251e69090654feddfe6a22f82fcf91f04c881a1031a5a21ca"
+    },
+    {
+      "file": "accueil/bonus-reader.js",
+      "bytes": 3270,
+      "sha256": "5e62373cbf9490a3e1a0429e882bf1382978fbdc54a2cce0eeec8a6f81ab8a05"
+    },
+    {
+      "file": "accueil/chambre-ordinateur-eteint-v2-x2.png",
+      "bytes": 6126711,
+      "sha256": "86e2fc396b71a244e6f4f37f6d7017853100d9d01c9fdcf5a0f94af132678d41"
+    },
+    {
+      "file": "accueil/crt.js",
+      "bytes": 742,
+      "sha256": "33bbbb42b93dde29f9ed5849fdca14673ebdaef042d74e77f57933669cb68e30"
+    },
+    {
+      "file": "accueil/entry.js",
+      "bytes": 243,
+      "sha256": "d8e2bef4ddce9a2742d34e3fccebd1bd6369a39536ad8a1d5111eff4bdff1a1e"
+    },
+    {
+      "file": "accueil/fanzine-wildiyzney/page-01.png",
+      "bytes": 1135262,
+      "sha256": "9cad7dd1a4881bbadb05e260e1e824520cb4e85593b508ef3116f6f3e3499f61"
+    },
+    {
+      "file": "accueil/fanzine-wildiyzney/page-02.png",
+      "bytes": 466398,
+      "sha256": "0bde65a8697f116317a20cf32c2f5476bb9b2cc8c7bd079c693f9de4982fa843"
+    },
+    {
+      "file": "accueil/fanzine-wildiyzney/page-03.png",
+      "bytes": 957864,
+      "sha256": "70aeb6a94ae8b8fa318c187bbbd36f03a9686bf17a98d681d633f29e5c901461"
+    },
+    {
+      "file": "accueil/fanzine-wildiyzney/page-04.png",
+      "bytes": 1435836,
+      "sha256": "678659b4c3709e90a545cc5a95a81a3077745c6c58aa9fadf8cfe9892197021a"
+    },
+    {
+      "file": "accueil/fanzine-wildiyzney/page-05.png",
+      "bytes": 816163,
+      "sha256": "e8fb79a395cb3e3e3450a3b657b2531a2cbf38ae0f0b9dd06f6cdf980fc1cc6e"
+    },
+    {
+      "file": "accueil/fanzine-wildiyzney/page-06.png",
+      "bytes": 835642,
+      "sha256": "72321c69ed3689277b40564da989b4e4ca43b6fd4a660d838d130eb8f654b859"
+    },
+    {
+      "file": "accueil/fanzine-wildiyzney/page-07.png",
+      "bytes": 828059,
+      "sha256": "2ecb833fe357ea0cf1ddd5cd8a7f8bb8e49609a2a526a904a5d38d8c3d623dc0"
+    },
+    {
+      "file": "accueil/fanzine-wildiyzney/page-08.png",
+      "bytes": 652451,
+      "sha256": "5228078783c415db5c40923f777b373e863233a43762eaf8d41a6f118bf3cd79"
+    },
+    {
+      "file": "accueil/fanzine-wildiyzney/page-09.png",
+      "bytes": 966476,
+      "sha256": "44d2482becf8d9d7b64fa687f6b9f6f442a414fdde3c5deeb53e759bc4e882e4"
+    },
+    {
+      "file": "accueil/fanzine-wildiyzney/page-10.png",
+      "bytes": 1255945,
+      "sha256": "7c62f6cc1d49d10159a79162b14f45a887edc7e5642e6ba6d5308c26a831b5b6"
+    },
+    {
+      "file": "accueil/fanzine-wildiyzney/page-11.png",
+      "bytes": 179388,
+      "sha256": "bf4144a45ac6f564dc3d3a8d2ebb05204a2c801eea1391e21b9dfd54998180e1"
+    },
+    {
+      "file": "accueil/fanzine-wildiyzney/page-12.png",
+      "bytes": 1288613,
+      "sha256": "f21c099f5df73bbe2a68811a68fb12eac938e745b955b931cbfabadb50336427"
+    },
+    {
+      "file": "accueil/fanzine-wildiyzney/pages.json",
+      "bytes": 2725,
+      "sha256": "a4d49365dafd427e0b75bdaf1a9640d0c40471ac5d3831215a29435c446717e7"
+    },
+    {
+      "file": "accueil/game-host.js",
+      "bytes": 971,
+      "sha256": "5b63fe0a9377ade88bfa5784c8b7a43b1c15886d1f34b6cf5c91e940ef423773"
+    },
+    {
+      "file": "accueil/loading.js",
+      "bytes": 2473,
+      "sha256": "299a6a67bd12a2c1d780f4fd3af9351bdcec139c7f4ab9974872553be6812901"
+    },
+    {
+      "file": "accueil/logo-just-die-for-it.gif",
+      "bytes": 269833,
+      "sha256": "f8ca3d4c8a59d03d29a8ac8bca1784a0f3ca8a48228cea614f6a0fa72cc4314c"
+    },
+    {
+      "file": "accueil/logo-update-your-world.gif",
+      "bytes": 1001104,
+      "sha256": "9e707d54d4380e127c8e52c5841492482483f6afd778587d05e8713f12d36965"
+    },
+    {
+      "file": "accueil/menu.js",
+      "bytes": 6572,
+      "sha256": "d3070ab4ffab4ae7e9b27c7872fbd47270dd109e1885257dc3603a03146bc57c"
+    },
+    {
+      "file": "accueil/poster-join-the-tribe-original.jpg",
+      "bytes": 2440144,
+      "sha256": "d76df1789e543ea8fee3bb19bb3fd5dcd402533f0a93884d19567e775a6e075a"
+    },
+    {
+      "file": "accueil/proposition.html",
+      "bytes": 15525,
+      "sha256": "bc8034782889021b42fc0a8efcdcdd1dc23f677dbe0c69ffd728e7d4f83cc4b8"
+    },
+    {
+      "file": "accueil/regions.css",
+      "bytes": 3774,
+      "sha256": "2324aabfa3fda0ce71f899b4579e181cf2a0f9a7f2560d2fecb7e1b28628bc99"
+    },
+    {
+      "file": "accueil/regions.js",
+      "bytes": 5148,
+      "sha256": "04431b711cf2a68ca963199365db672e1833eb6c3ce6c477657f590fd02bbad4"
+    },
+    {
+      "file": "accueil/scene-layout.js",
+      "bytes": 326,
+      "sha256": "d02a67b73f5a568717712770fdb9bc095d70cbbd466ed39b449335ea3816035c"
+    },
+    {
+      "file": "audio/break-beat-90s.mp3",
+      "bytes": 10730307,
+      "sha256": "a09d2cefc6b4b1c0a67e86b98ea6cac47903e82ac3b38bab75bf11ba3b5d4e57"
+    },
+    {
+      "file": "audio/hazy-breakbeat.mp3",
+      "bytes": 4483753,
+      "sha256": "daf8ddcbb0fdae87050a04fdb09acdadbf0d2a8c7c26129789e0b18a619172c3"
+    },
+    {
+      "file": "chargement/loading-static.png",
+      "bytes": 2605,
+      "sha256": "881cca4477f303a7aa3b6ca1d67fae3fededdf8caedd5420bbe0fcc843459f2e"
+    },
+    {
+      "file": "chargement/loading.gif",
+      "bytes": 3924,
+      "sha256": "8e8f2472690a3c5f60c3e9e4d2703b03bd0cfacf5899c410577c8151d649cdff"
+    },
+    {
+      "file": "chargement/logo-static.png",
+      "bytes": 149882,
+      "sha256": "ce4e000d5e56e2cbc6a16aed484eb58085b89693db2f6f4a0a8d97301c40bf14"
+    },
+    {
+      "file": "data/portwatch-suez-snapshot.js",
+      "bytes": 7913,
+      "sha256": "c5e9f83d054c6fdd70492d567113fc133b9cf52a4260effefdc0022968882347"
+    },
+    {
+      "file": "ecran-test-pixel-art.html",
+      "bytes": 69073,
+      "sha256": "39ae4793ccd3d7441a6d64b9590242fbbf9beefd17d5279cfc587d381a33d2ac"
+    },
+    {
+      "file": "index.html",
+      "bytes": 363,
+      "sha256": "3062ee3efa0a15e4c36ba5495a99d85882262c53f43258b0dfb751aaa590f3c8"
+    },
+    {
+      "file": "layout-publicite/dollar-clic-static.png",
+      "bytes": 713,
+      "sha256": "83cbe1a4913d4d2453f0aa6b50b3016eea76a4ec8534760ccb294d356df9e503"
+    },
+    {
+      "file": "layout-publicite/dollar-clic.gif",
+      "bytes": 3462,
+      "sha256": "be563391fab1fc6b914193cb477e9880eaccbdbc696d0270868c6f2d16cfbcc3"
+    },
+    {
+      "file": "layout-publicite/habillage.css",
+      "bytes": 12311,
+      "sha256": "e16ff8eeab88baeab9aca86d1563e2cd4deb43999a5eab76c7e4b91b8b64acaa"
+    },
+    {
+      "file": "layout-publicite/scene-version-4-x2.png",
+      "bytes": 5923812,
+      "sha256": "0d24cc67376daff213d7fed0c807fda3ac85146bcf6c73a7bce880ba914e894a"
+    },
+    {
+      "file": "logo-play-the-end/logo-play-the-end-v1.png",
+      "bytes": 1012844,
+      "sha256": "0b9c1a2f234a3863b1c029678cd4b321d12ad9c760fd8ba15d26224f0c20fded"
+    },
+    {
+      "file": "polices-pixel/PixelifySans-OFL.txt",
+      "bytes": 4488,
+      "sha256": "b66ba46f511a851ab09998b5a5a9fdbb102545a3864cb993095e1745996873a7"
+    },
+    {
+      "file": "polices-pixel/PixelifySans.ttf",
+      "bytes": 79160,
+      "sha256": "9ba86cd010a4de309d263ceff8e8044092c9db7efda869620cb9ff1c4389e8a5"
+    },
+    {
+      "file": "polices-pixel/PressStart2P-OFL.txt",
+      "bytes": 4413,
+      "sha256": "705960c3281a5765ecc0b59bd4ed7ca59eed165748076bc2fc3e8fdbfeb944b0"
+    },
+    {
+      "file": "polices-pixel/PressStart2P.ttf",
+      "bytes": 118204,
+      "sha256": "034c77f1f05ec89421e4a63f0e3a4ca1ecf852cc6d2bf611f126f275728e017d"
+    },
+    {
+      "file": "polices-pixel/Silkscreen-OFL.txt",
+      "bytes": 4394,
+      "sha256": "86c5e9c9382cdcc5948704fdfe60f2aa164a719746931219a42736ecd9cefbd3"
+    },
+    {
+      "file": "polices-pixel/VT323-OFL.txt",
+      "bytes": 4367,
+      "sha256": "27d9af34210253e7ca1251fbace86c6f65b40031d6ce1a75493a1b2093631298"
+    },
+    {
+      "file": "polices-pixel/VT323.ttf",
+      "bytes": 153116,
+      "sha256": "cf4de751ada78ceac033dbe16a687742939995b77bc2a052ae17a4957958594d"
+    },
+    {
+      "file": "portwatch.js",
+      "bytes": 6060,
+      "sha256": "5e03531f0527aa62da84a7a7ce6c499350aad04d757716cff82cd1a264556004"
+    },
+    {
+      "file": "sprites-cataclysme/tempete-static.png",
+      "bytes": 727496,
+      "sha256": "e731b411c5fd3cd16a783affe70e5acd5a786db5ee65a072260bc52ea2447c56"
+    },
+    {
+      "file": "sprites-cataclysme/tempete.gif",
+      "bytes": 1358572,
+      "sha256": "f803571908b886b8e9726027ee2d98de5e38f5693756c32efa2af1e809663d75"
+    },
+    {
+      "file": "sprites-fin/v2/gold-static.png",
+      "bytes": 287829,
+      "sha256": "573a5c0bc591cd725a5d1cec30ccd359891468fd1b2fddbca89cd06b42b1dba0"
+    },
+    {
+      "file": "sprites-fin/v2/gold.gif",
+      "bytes": 1830825,
+      "sha256": "fb36136d080d6f68161313cc3815e63283e36b45f301f34aa8450d191a83a72c"
+    },
+    {
+      "file": "sprites-fin/v2/silver-static.png",
+      "bytes": 328367,
+      "sha256": "caba254118966ac29fd78131948dbecf27b6fa8892de4849d19297be6458c012"
+    },
+    {
+      "file": "sprites-fin/v2/silver.gif",
+      "bytes": 131375,
+      "sha256": "37d066f462d95d00c1d9ecdda46014183942987a25297aa54e00d3829daa813a"
+    },
+    {
+      "file": "sprites-interface/banner-static.png",
+      "bytes": 2261,
+      "sha256": "4f3d2b8741411bc9c748ce82cb79a9c33f4b290d96325d3b373814f71de642e4"
+    },
+    {
+      "file": "sprites-interface/banner.gif",
+      "bytes": 12731,
+      "sha256": "b5f49df8b4facf23aedda001cc286dd23a0b41fa1d7d27c02f412a34d830f75c"
+    },
+    {
+      "file": "sprites-interface/commands-v1.png",
+      "bytes": 591,
+      "sha256": "191814e48e2fb65c522f4eea410c30893f051c825aaadd6e51e88a524993b063"
+    },
+    {
+      "file": "sprites-interface/fractal-static.png",
+      "bytes": 60860,
+      "sha256": "4dc3aad4597ebf97d982086212d940a51461d1ab88c9401f33a92a2ed844bb6c"
+    },
+    {
+      "file": "sprites-interface/fractal.gif",
+      "bytes": 2665155,
+      "sha256": "3d10ac123946b38ade6e507867dbef3442a26a0cdd6ba1688ead2aaec488b183"
+    },
+    {
+      "file": "sprites-map/lot-1/frames.js",
+      "bytes": 1202,
+      "sha256": "c33130490476a3be673e0aa65f11f13f60d4ff1a6f35d4026208a7b469527b5a"
+    },
+    {
+      "file": "sprites-map/lot-1/ressources-v1.png",
+      "bytes": 1430491,
+      "sha256": "302a22f0ef614e943b777163b53c5ca5274723a385ad70cf978d83daad8874b9"
+    },
+    {
+      "file": "sprites-map/lot-1/sols-v1.png",
+      "bytes": 1561333,
+      "sha256": "bed5e908ade4753e6a6340fc456f6612f47141da5d6fcf4a59cde2be1f7f1066"
+    },
+    {
+      "file": "sprites-mer/frames.js",
+      "bytes": 164,
+      "sha256": "d91d16cc51d04b15d01c3fd3b340366d76e7a5effcab0d80095775dbc38a6b86"
+    },
+    {
+      "file": "sprites-mer/mer-vagues-v1.png",
+      "bytes": 3079,
+      "sha256": "c302fba57f2db66056322f931316918da1234495b5cbc3835b7d493949481441"
+    },
+    {
+      "file": "sprites-navals/versions/cargo-cotier-v2.png",
+      "bytes": 1982780,
+      "sha256": "136d303f13b95d21a9224c8890d352b82ea4ca078d7f901bde049b2392a1c865"
+    },
+    {
+      "file": "sprites-navals/versions/frames.js",
+      "bytes": 3229,
+      "sha256": "ca4580b89d3743ded9b74ef60b9fac097c8c5c00ed98492604d6a029acd4de0c"
+    },
+    {
+      "file": "sprites-navals/versions/petrolier-v2.png",
+      "bytes": 2034049,
+      "sha256": "43a692b94f3f0601b264dc42b4f598a6b44a1094cae1fdb853391c0260401620"
+    },
+    {
+      "file": "sprites-navals/versions/porte-conteneurs-v2.png",
+      "bytes": 2114078,
+      "sha256": "97a20d66b412c9b06ae0d10f0ca651a045b46f1089bfb80fbe1a85a716eb298b"
+    },
+    {
+      "file": "sprites-navals/versions/roulier-v2.png",
+      "bytes": 1947223,
+      "sha256": "79d8a09f4555589bd0258c440e05c70fb3a2540cd211719f488bbf8b90c3d8f8"
+    },
+    {
+      "file": "sprites-navals/versions/vraquier-v2.png",
+      "bytes": 2061108,
+      "sha256": "3667638fcac42e2e536b98c56bf52f5f4e13372d9af3f5424d82c18cd104e04f"
+    },
+    {
+      "file": "world-data.js",
+      "bytes": 7042,
+      "sha256": "54cf425f1fb9afcb655e6a10a95b7ad571954e0c12693bcd6d27dfe9e4b71331"
+    }
+  ]
+}
