@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#10191a">
+  <title>Play The End | Accueil</title>
+  <style>
+    html,body { background:#000; }
+    #boot-screen { position:fixed; inset:0; z-index:20; display:none; background:#000; }
+    html[data-boot-loading='true'] #boot-screen { display:block; }
+    html[data-boot-loading='true'] #home-viewport { visibility:hidden; }
+  </style>
+  <script>
+    (()=>{
+      const root=document.documentElement;
+      root.dataset.bootLoading='true';
+      root.style.setProperty('--boot-scale',String(Math.min(innerWidth/1536,innerHeight/864)));
+      window.PLAY_THE_END_BOOT_TIMEOUT=window.setTimeout(()=>{
+        delete root.dataset.bootLoading;
+        const screen=document.getElementById('boot-screen'),home=document.getElementById('home-viewport');
+        if(screen){screen.hidden=true;screen.setAttribute('aria-busy','false');}
+        if(home){home.inert=false;home.setAttribute('aria-busy','false');}
+      },12000);
+    })();
+  </script>
+  <link rel="stylesheet" href="accueil.css?v=loading-v17">
+  <link rel="stylesheet" href="regions.css?v=principes-v10">
+</head>
+<body>
+  <section id="boot-screen" role="status" aria-label="Loading Play The End" aria-live="polite" aria-busy="true">
+    <div class="boot-stage">
+      <picture class="boot-logo"><source media="(prefers-reduced-motion: reduce)" srcset="../chargement/logo-static.png"><img id="boot-logo" src="logo-update-your-world.gif" alt="Update Your World: Video games for a brighter tomorrow" width="960" height="560"></picture>
+      <picture class="boot-loading"><source media="(prefers-reduced-motion: reduce)" srcset="../chargement/loading-static.png"><img id="boot-loading" src="../chargement/loading.gif" alt="Loading" width="360" height="80"></picture>
+    </div>
+  </section>
+  <div class="viewport" id="home-viewport">
+    <main class="stage" id="stage" aria-label="Accueil de Play The End">
+      <img class="room-background" id="home-room" src="chambre-ordinateur-eteint-v2-x2.png" alt="Chambre en pixel art, affiche Join the Tribe éclairée sur le mur et bibliothèque dessinée." width="3344" height="1882">
+      <div class="crt-screen" id="crt-screen" aria-hidden="true"><img id="crt-fractal" src="../sprites-interface/fractal-static.png?v=wireframe-v11" alt="" width="320" height="240"></div>
+      <button class="room-art poster" id="poster" type="button" title="Voir l'affiche" aria-label="Voir la caricature originale Join the Tribe"></button>
+      <h1 class="brand" id="brand"><img id="home-brand-logo" src="../logo-play-the-end/logo-play-the-end-v1.png" alt="Play the End" width="1254" height="1254"></h1>
+      <img class="creator-logo" id="creator-logo" src="logo-just-die-for-it.gif" alt="JUST DIE FOR IT." width="240" height="252">
+      <img class="creator-logo distributor-logo" id="distributor-logo" src="logo-update-your-world.gif" alt="Update Your World: Video games for a brighter tomorrow" width="960" height="560">
+      <nav class="main-menu" id="main-menu" aria-label="Menu principal">
+        <a class="menu-item menu-start" id="start" href="../ecran-test-pixel-art.html?play=1&amp;v=traces-v11"><svg class="lucide lucide-power" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v10"/><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/></svg><span>Démarrer</span></a>
+        <button class="menu-item" id="open-options" type="button" data-panel="options"><svg class="lucide lucide-sliders-horizontal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 4h-7M10 4H3M21 12h-9M8 12H3M21 20h-5M12 20H3M14 2v4M8 10v4M16 18v4"/></svg><span>Options</span></button>
+        <button class="menu-item" id="open-bonus" type="button" data-panel="bonus"><svg class="lucide lucide-gift" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M19 12v9H5v-9M12 8H7.5a2.5 2.5 0 1 1 2.45-3c.3.9 2.05 3 2.05 3ZM12 8h4.5a2.5 2.5 0 1 0-2.45-3C13.75 5.9 12 8 12 8Z"/></svg><span>Bonus</span></button>
+        <button class="menu-item" id="open-credits" type="button" data-panel="credits"><svg class="lucide lucide-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><span>Crédits</span></button>
+      </nav>
+      <section class="menu-panel regions-panel" id="panel-regions" aria-labelledby="regions-title" hidden>
+        <div class="panel-heading"><button class="icon-button back" type="button" title="Retour" aria-label="Retour au menu"><svg class="lucide lucide-arrow-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m12 19-7-7 7-7M5 12h14"/></svg></button><h2 id="regions-title" tabindex="-1">Choisir une zone</h2><span class="region-sync" id="region-sync" role="status">DÉMO</span><button class="icon-button" id="region-refresh" type="button" title="Actualiser les données" aria-label="Actualiser les données"><svg class="lucide lucide-refresh-cw" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m3 12 1.5-1.5M3 3v6h6M21 12l-1.5 1.5M21 21v-6h-6"/><path d="M3 9a9 9 0 0 1 15.4-5.4L21 6M3 18l2.6 2.4A9 9 0 0 0 21 15"/></svg></button></div>
+        <div class="region-principles" id="region-principles" aria-label="Principes de la partie">
+          <section><h3>Une zone, un risque de départ</h3><p id="region-risk-explanation">Chaque zone a ses signaux. Chaleur, sécheresse et pollution font monter la pression ; vent et séismes renforcent les ripostes. Plus l’indice est élevé, plus le départ est tendu.</p></section>
+          <section><h3>Plus vous réussissez, plus tout se dégrade</h3><p>Votre flotte affronte les ressources cachées de la Terre. Chaque case de ressource touchée augmente la jauge cataclysme : les ripostes deviennent plus redoutables, les cargos sont en danger.</p></section>
+          <section><h3>Deux camps, une fausse victoire</h3><p>Toutes les ressources achetées : vos babioles survivent. Flotte coulée : la Terre gagne. Les signaux du monde nourrissent des règles fictives ; DÉMO indique une source indisponible.</p></section>
+        </div>
+        <div class="region-layout">
+          <div class="region-browser"><div class="region-columns" aria-hidden="true"><span>N°</span><span>ZONE</span><span>TENSION</span><span>DATA</span></div><div id="region-list" role="radiogroup" aria-label="Région de la partie" aria-describedby="region-risk-explanation"></div></div>
+          <div class="region-detail">
+            <div class="region-detail-heading"><h3 id="region-title">Bornéo</h3><p id="region-area">Indonésie / Malaisie</p></div>
+            <figure class="region-locator"><canvas id="region-locator" width="320" height="240" role="img" aria-label="Position des dix régions sur une grille de coordonnées terrestres."></canvas><figcaption id="region-coordinates">0.60° N / 116.60° E</figcaption></figure>
+            <dl class="region-metrics"><div><dt>VENT</dt><dd id="region-wind">24 km/h</dd><small id="region-weather-mode">DÉMO</small></div><div><dt>TEMPÉRATURE</dt><dd id="region-heat">31 °C</dd><small id="region-humidity">61 % humidité</small></div><div><dt>AIR / PM2.5</dt><dd id="region-air">21 µg/m³</dd><small id="region-air-mode">DÉMO</small></div><div><dt>SÉISMES / 24H</dt><dd id="region-quakes">1</dd><small id="region-quake-mode">DÉMO / 1 000 km</small></div><div class="region-naval"><dt><a href="https://portwatch.imf.org/" target="_blank" rel="noopener">PORTWATCH / NAVIRES</a></dt><dd id="region-naval-count">À raccorder</dd><small id="region-naval-date">Pilote : Suez seulement</small></div></dl>
+            <div class="region-launch"><div><label>INDICE DE JEU</label><strong id="region-tension" aria-describedby="region-risk-explanation">0 / 100</strong></div><button class="menu-item menu-start" id="region-play" type="button"><svg class="lucide lucide-power" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 2v10M18.36 6.64a9 9 0 1 1-12.73 0"/></svg><span>Jouer</span></button></div>
+          </div>
+        </div>
+        <footer class="region-footnote"><span>Indice de difficulté, pas un classement écologique.<br>PortWatch : Suez en test · +8 pts de pression max. si récent.</span><span><a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo / CAMS</a> · <a href="https://earthquake.usgs.gov/earthquakes/feed/v1.0/geojson.php" target="_blank" rel="noopener">USGS</a><br><span id="region-time">Valeurs de démonstration</span></span></footer>
+      </section>
+      <section class="menu-panel small-panel" id="panel-options" aria-labelledby="options-title" hidden>
+        <div class="panel-heading"><button class="icon-button back" type="button" title="Retour" aria-label="Retour au menu"><svg class="lucide lucide-arrow-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7M5 12h14"/></svg></button><h2 id="options-title" tabindex="-1">Options</h2></div>
+        <div class="panel-content">
+          <label class="option-row" for="music-enabled"><span>Musique</span><input id="music-enabled" type="checkbox"></label>
+          <label class="volume-label" for="volume"><span>Volume</span><output id="volume-value" for="volume">25 %</output></label>
+          <input id="volume" type="range" min="0" max="100" step="1" value="25" aria-label="Volume de la musique">
+          <p id="audio-error" role="status" hidden>Lecture audio indisponible.</p>
+        </div>
+      </section>
+      <section class="menu-panel bonus-panel" id="panel-bonus" aria-labelledby="bonus-title" hidden>
+        <div class="panel-heading"><button class="icon-button back" type="button" title="Retour" aria-label="Retour au menu"><svg class="lucide lucide-arrow-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7M5 12h14"/></svg></button><h2 id="bonus-title" tabindex="-1">Bonus</h2><a class="icon-button" id="bonus-download" href="poster-join-the-tribe-original.jpg" download title="Télécharger l'original" aria-label="Télécharger l'original"><svg class="lucide lucide-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg></a></div>
+        <div class="bonus-tabs" role="tablist" aria-label="Bonus"><button id="tab-poster" type="button" role="tab" aria-selected="true" aria-controls="bonus-view">Join the Tribe</button><button id="tab-fanzine" type="button" role="tab" aria-selected="false" aria-controls="fanzine-reader" tabindex="-1">WILDIYZNEY WORLD</button></div>
+        <div class="bonus-view" id="bonus-view" role="tabpanel" aria-labelledby="tab-poster"><img id="bonus-image" src="poster-join-the-tribe-original.jpg" alt="Caricature originale Join the Tribe." width="2480" height="3508" loading="lazy"></div>
+        <div class="fanzine-reader" id="fanzine-reader" role="tabpanel" aria-labelledby="tab-fanzine" hidden>
+          <div class="book-toolbar"><div class="book-title">WILDIYZNEY WORLD<small>Irvin Flesh</small></div><button class="icon-button" id="book-prev" type="button" title="Pages précédentes" aria-label="Pages précédentes"><svg class="lucide lucide-chevron-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button><select id="book-spread" aria-label="Pages du fanzine"><option value="0">Couverture</option><option value="1">Pages 2-3</option><option value="2">Pages 4-5</option><option value="3">Pages 6-7</option><option value="4">Pages 8-9</option><option value="5">Pages 10-11</option><option value="6">Dos de couverture</option></select><button class="icon-button" id="book-next" type="button" title="Pages suivantes" aria-label="Pages suivantes"><svg class="lucide lucide-chevron-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button><button class="icon-button" id="book-zoom" type="button" title="Agrandir les pages" aria-label="Agrandir les pages" aria-pressed="false"><svg class="lucide lucide-zoom-in" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3M8 11h6M11 8v6"/></svg></button></div>
+          <div class="book-viewport" id="book-viewport"><div class="book-pages" id="book-pages"><figure class="book-page" id="book-page-left"><img id="book-image-left" src="fanzine-wildiyzney/page-01.png" alt="WILDIYZNEY WORLD : couverture" width="1049" height="1489" loading="lazy"></figure><figure class="book-page" id="book-page-right" hidden><img id="book-image-right" alt="" width="1049" height="1489"></figure></div></div>
+          <p class="book-caption" id="book-caption" aria-live="polite">Couverture / 12 pages</p><p class="book-error" id="book-error" role="status" hidden>Page indisponible.</p>
+        </div>
+      </section>
+      <section class="menu-panel credits-panel" id="panel-credits" aria-labelledby="credits-title" hidden>
+        <div class="panel-heading"><button class="icon-button back" type="button" title="Retour" aria-label="Retour au menu"><svg class="lucide lucide-arrow-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7M5 12h14"/></svg></button><h2 id="credits-title" tabindex="-1">Crédits</h2></div>
+        <dl class="panel-content credits-list"><dt>Concept, règles et direction artistique</dt><dd>Chanic</dd><dt>Dessins originaux</dt><dd>Chanic</dd><dt>Code, interface et intégration</dt><dd>Codex (OpenAI)</dd><dt>Décors, sprites et animations</dt><dd>Codex (OpenAI)<br>Génération d’images et rendu pixel art</dd><dt>Musique originale</dt><dd>Chanic / Blackpoodle Records</dd><dt>Remasterisation musicale</dt><dd>Suno</dd><dt>Morceaux</dt><dd>Break Beat 90s<br>Hazy Breakbeat</dd><dt>Icônes</dt><dd>Lucide, adaptées en sprites pixel art</dd><dt>Fanzine Bonus</dt><dd>WILDIYZNEY WORLD<br>Irvin Flesh</dd></dl>
+      </section>
+    </main>
+  </div>
+  <iframe class="game-frame" id="game-frame" title="Play The End : partie" allow="autoplay" hidden></iframe>
+  <audio id="menu-music" src="../audio/break-beat-90s.mp3" loop preload="none"></audio>
+  <script src="scene-layout.js"></script>
+  <script src="bonus-reader.js"></script>
+  <script src="crt.js?v=wireframe-v11"></script>
+  <script src="../data/portwatch-suez-snapshot.js"></script>
+  <script src="../portwatch.js"></script>
+  <script src="../world-data.js"></script>
+  <script src="regions.js"></script>
+  <script src="menu.js?v=7"></script>
+  <script src="loading.js?v=17"></script>
+</body>
+</html>
