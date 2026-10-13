@@ -16,7 +16,7 @@ These signals become fictional game rules, not a scientific simulation. The map 
 
 A static web game, with no installation required. The entry point is `index.html`.
 
-Once GitHub Pages is enabled: [Play in your browser](https://updateyourworld-wq.github.io/Play_the_end/).
+[Play in your browser](https://updateyourworld-wq.github.io/Play_the_end/).
 
 Advertisements are intentionally disabled in this test version.
 
@@ -36,6 +36,6 @@ Font licences are included in `polices-pixel`. Publishing this repository does n
 
 ## Test Version
 
-Prototype v17, October 13, 2026. Eleven local DOM/audio/Canvas test suites passed; browser and hosting checks remain to be confirmed after publication.
+Prototype v17, October 13, 2026. Eleven local DOM/audio/Canvas test suites passed. The public GitHub Pages version was checked in-browser: loading screen, home, region selection, live data, game start, a grid click and the following retaliation. A full playthrough on the hosted version has not yet been tested.
 
 Only runtime files and their checksum manifest are included. Earlier proposals and working files are excluded.
